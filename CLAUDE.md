@@ -15,11 +15,11 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**Phase 2 complete** — full service implementations, response DTOs, and alert scanner pushed to `develop` (commit `01ccade`, issue #2).
+**Phase 3 complete** — frontend scaffold pushed to `develop` (commit `c1e83a8`, issue #3).
 
-All 7 CRUD services have full field mappings. All 8 controllers return response DTOs. The nightly alert scanner runs at 02:30 and generates alerts for insurance premiums (30 days), monthly obligations (7 days), will review reminders (30 days), and stale asset values (90 days).
+React 18 + Vite + TypeScript + Tailwind CSS v4 + React Router v6 + Axios + Zustand. Full API layer (9 resource modules + auth + dashboard). Auth flow working: login/register forms, Google OAuth2 button, JWT persisted in localStorage via Zustand. Layout with desktop sidebar + mobile BottomNav. DashboardPage shows live net-worth summary. All 8 resource pages are stub placeholders.
 
-Next: **Phase 3** — frontend scaffold (React + Vite + Tailwind + Zustand).
+Next: **Phase 4** — feature pages (Assets, Liabilities, Insurance, Recurring, TrustedPersons, DigitalAccounts, Will, Alerts).
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

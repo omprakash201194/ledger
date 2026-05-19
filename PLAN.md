@@ -302,7 +302,7 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 8. Implement `AlertService` nightly scanner (insurance premiums, EMIs, will review, stale assets)
 9. Response DTOs (replace returning raw JPA entities from controllers)
 
-### Phase 3 — Frontend foundation
+### Phase 3 — Frontend foundation ✅ DONE (commit `c1e83a8`, issue #3)
 10. `npm create vite@latest` — React + TypeScript
 11. Tailwind CSS, React Router, Axios, Zustand
 12. Auth pages (Login, OAuth2 callback), `ProtectedRoute`, `authStore`

@@ -1,8 +1,11 @@
 package com.omprakashgautam.homelab.ledger.service;
 
 import com.omprakashgautam.homelab.ledger.dto.request.WillRecordRequest;
+import com.omprakashgautam.homelab.ledger.dto.response.WillRecordResponse;
+import com.omprakashgautam.homelab.ledger.exception.ResourceNotFoundException;
 import com.omprakashgautam.homelab.ledger.model.User;
 import com.omprakashgautam.homelab.ledger.model.WillRecord;
+import com.omprakashgautam.homelab.ledger.repository.TrustedPersonRepository;
 import com.omprakashgautam.homelab.ledger.repository.UserRepository;
 import com.omprakashgautam.homelab.ledger.repository.WillRecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +21,31 @@ public class WillRecordService {
 
     private final WillRecordRepository willRecordRepository;
     private final UserRepository userRepository;
+    private final TrustedPersonRepository trustedPersonRepository;
 
-    public Optional<WillRecord> find(String email) {
+    public Optional<WillRecordResponse> find(String email) {
         User user = getUser(email);
-        return willRecordRepository.findByUserId(user.getId());
+        return willRecordRepository.findByUserId(user.getId()).map(WillRecordResponse::from);
     }
 
     @Transactional
-    public WillRecord upsert(WillRecordRequest req, String email) {
+    public WillRecordResponse upsert(WillRecordRequest req, String email) {
         User user = getUser(email);
         WillRecord record = willRecordRepository.findByUserId(user.getId())
                 .orElse(WillRecord.builder().user(user).build());
-        // TODO Phase 2: apply fields from req
-        return willRecordRepository.save(record);
+        record.setHasWill(req.isHasWill());
+        record.setWillType(req.getWillType());
+        record.setLocation(req.getLocation());
+        record.setRegisteredWith(req.getRegisteredWith());
+        record.setReviewReminderDate(req.getReviewReminderDate());
+        record.setNotes(req.getNotes());
+        if (req.getExecutorId() != null) {
+            record.setExecutor(trustedPersonRepository.findById(req.getExecutorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("TrustedPerson not found: " + req.getExecutorId())));
+        } else {
+            record.setExecutor(null);
+        }
+        return WillRecordResponse.from(willRecordRepository.save(record));
     }
 
     private User getUser(String email) {

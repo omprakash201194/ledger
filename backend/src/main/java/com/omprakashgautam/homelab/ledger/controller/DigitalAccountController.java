@@ -1,7 +1,7 @@
 package com.omprakashgautam.homelab.ledger.controller;
 
 import com.omprakashgautam.homelab.ledger.dto.request.DigitalAccountRequest;
-import com.omprakashgautam.homelab.ledger.model.DigitalAccount;
+import com.omprakashgautam.homelab.ledger.dto.response.DigitalAccountResponse;
 import com.omprakashgautam.homelab.ledger.security.UserDetailsImpl;
 import com.omprakashgautam.homelab.ledger.service.DigitalAccountService;
 import jakarta.validation.Valid;
@@ -21,24 +21,24 @@ public class DigitalAccountController {
     private final DigitalAccountService digitalAccountService;
 
     @GetMapping
-    public ResponseEntity<List<DigitalAccount>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<List<DigitalAccountResponse>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(digitalAccountService.findAll(principal.getUsername()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DigitalAccount> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<DigitalAccountResponse> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(digitalAccountService.findById(id, principal.getUsername()));
     }
 
     @PostMapping
-    public ResponseEntity<DigitalAccount> create(@Valid @RequestBody DigitalAccountRequest request,
-                                            @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<DigitalAccountResponse> create(@Valid @RequestBody DigitalAccountRequest request,
+                                                         @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(digitalAccountService.create(request, principal.getUsername()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DigitalAccount> update(@PathVariable UUID id, @Valid @RequestBody DigitalAccountRequest request,
-                                             @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<DigitalAccountResponse> update(@PathVariable UUID id, @Valid @RequestBody DigitalAccountRequest request,
+                                                         @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(digitalAccountService.update(id, request, principal.getUsername()));
     }
 

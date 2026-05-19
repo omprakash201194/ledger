@@ -1,6 +1,7 @@
 package com.omprakashgautam.homelab.ledger.service;
 
 import com.omprakashgautam.homelab.ledger.dto.request.DigitalAccountRequest;
+import com.omprakashgautam.homelab.ledger.dto.response.DigitalAccountResponse;
 import com.omprakashgautam.homelab.ledger.exception.ResourceNotFoundException;
 import com.omprakashgautam.homelab.ledger.model.DigitalAccount;
 import com.omprakashgautam.homelab.ledger.model.User;
@@ -21,34 +22,34 @@ public class DigitalAccountService {
     private final DigitalAccountRepository digitalAccountRepository;
     private final UserRepository userRepository;
 
-    public List<DigitalAccount> findAll(String email) {
+    public List<DigitalAccountResponse> findAll(String email) {
         User user = getUser(email);
-        return digitalAccountRepository.findByUserId(user.getId());
+        return digitalAccountRepository.findByUserId(user.getId()).stream()
+                .map(DigitalAccountResponse::from).toList();
     }
 
-    public DigitalAccount findById(UUID id, String email) {
-        return getOwned(id, email);
+    public DigitalAccountResponse findById(UUID id, String email) {
+        return DigitalAccountResponse.from(getOwned(id, email));
     }
 
     @Transactional
-    public DigitalAccount create(DigitalAccountRequest req, String email) {
+    public DigitalAccountResponse create(DigitalAccountRequest req, String email) {
         User user = getUser(email);
         DigitalAccount entity = mapFromRequest(req);
         entity.setUser(user);
-        return digitalAccountRepository.save(entity);
+        return DigitalAccountResponse.from(digitalAccountRepository.save(entity));
     }
 
     @Transactional
-    public DigitalAccount update(UUID id, DigitalAccountRequest req, String email) {
+    public DigitalAccountResponse update(UUID id, DigitalAccountRequest req, String email) {
         DigitalAccount entity = getOwned(id, email);
         applyUpdate(entity, req);
-        return digitalAccountRepository.save(entity);
+        return DigitalAccountResponse.from(digitalAccountRepository.save(entity));
     }
 
     @Transactional
     public void delete(UUID id, String email) {
-        DigitalAccount entity = getOwned(id, email);
-        digitalAccountRepository.delete(entity);
+        digitalAccountRepository.delete(getOwned(id, email));
     }
 
     private DigitalAccount getOwned(UUID id, String email) {
@@ -65,7 +66,27 @@ public class DigitalAccountService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    // TODO Phase 2: implement mapping
-    private DigitalAccount mapFromRequest(DigitalAccountRequest req) { return new DigitalAccount(); }
-    private void applyUpdate(DigitalAccount entity, DigitalAccountRequest req) {}
+    private DigitalAccount mapFromRequest(DigitalAccountRequest req) {
+        DigitalAccount entity = new DigitalAccount();
+        entity.setCategory(req.getCategory());
+        entity.setServiceName(req.getServiceName());
+        entity.setUsername(req.getUsername());
+        entity.setCredentialLocation(req.getCredentialLocation());
+        entity.setTwoFaMethod(req.getTwoFaMethod());
+        entity.setRecoveryContact(req.getRecoveryContact());
+        entity.setActionOnDeath(req.getActionOnDeath());
+        entity.setRemarks(req.getRemarks());
+        return entity;
+    }
+
+    private void applyUpdate(DigitalAccount entity, DigitalAccountRequest req) {
+        entity.setCategory(req.getCategory());
+        entity.setServiceName(req.getServiceName());
+        entity.setUsername(req.getUsername());
+        entity.setCredentialLocation(req.getCredentialLocation());
+        entity.setTwoFaMethod(req.getTwoFaMethod());
+        entity.setRecoveryContact(req.getRecoveryContact());
+        entity.setActionOnDeath(req.getActionOnDeath());
+        entity.setRemarks(req.getRemarks());
+    }
 }

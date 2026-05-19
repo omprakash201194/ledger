@@ -1,6 +1,6 @@
 package com.omprakashgautam.homelab.ledger.controller;
 
-import com.omprakashgautam.homelab.ledger.model.Alert;
+import com.omprakashgautam.homelab.ledger.dto.response.AlertResponse;
 import com.omprakashgautam.homelab.ledger.security.UserDetailsImpl;
 import com.omprakashgautam.homelab.ledger.service.AlertService;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,13 @@ public class AlertController {
     private final AlertService alertService;
 
     @GetMapping
-    public ResponseEntity<List<Alert>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<List<AlertResponse>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(alertService.findAll(principal.getUsername()));
     }
 
     @PatchMapping("/{id}/read")
-    public ResponseEntity<Alert> markRead(@PathVariable UUID id,
-                                          @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<AlertResponse> markRead(@PathVariable UUID id,
+                                                  @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(alertService.markRead(id, principal.getUsername()));
     }
 

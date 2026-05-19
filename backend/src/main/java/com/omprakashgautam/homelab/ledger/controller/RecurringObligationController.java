@@ -1,7 +1,7 @@
 package com.omprakashgautam.homelab.ledger.controller;
 
 import com.omprakashgautam.homelab.ledger.dto.request.RecurringObligationRequest;
-import com.omprakashgautam.homelab.ledger.model.RecurringObligation;
+import com.omprakashgautam.homelab.ledger.dto.response.RecurringObligationResponse;
 import com.omprakashgautam.homelab.ledger.security.UserDetailsImpl;
 import com.omprakashgautam.homelab.ledger.service.RecurringObligationService;
 import jakarta.validation.Valid;
@@ -21,24 +21,24 @@ public class RecurringObligationController {
     private final RecurringObligationService recurringObligationService;
 
     @GetMapping
-    public ResponseEntity<List<RecurringObligation>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<List<RecurringObligationResponse>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(recurringObligationService.findAll(principal.getUsername()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecurringObligation> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<RecurringObligationResponse> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(recurringObligationService.findById(id, principal.getUsername()));
     }
 
     @PostMapping
-    public ResponseEntity<RecurringObligation> create(@Valid @RequestBody RecurringObligationRequest request,
-                                            @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<RecurringObligationResponse> create(@Valid @RequestBody RecurringObligationRequest request,
+                                                              @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(recurringObligationService.create(request, principal.getUsername()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RecurringObligation> update(@PathVariable UUID id, @Valid @RequestBody RecurringObligationRequest request,
-                                             @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<RecurringObligationResponse> update(@PathVariable UUID id, @Valid @RequestBody RecurringObligationRequest request,
+                                                              @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(recurringObligationService.update(id, request, principal.getUsername()));
     }
 

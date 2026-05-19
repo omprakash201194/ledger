@@ -1,6 +1,7 @@
 package com.omprakashgautam.homelab.ledger.service;
 
 import com.omprakashgautam.homelab.ledger.dto.request.TrustedPersonRequest;
+import com.omprakashgautam.homelab.ledger.dto.response.TrustedPersonResponse;
 import com.omprakashgautam.homelab.ledger.exception.ResourceNotFoundException;
 import com.omprakashgautam.homelab.ledger.model.TrustedPerson;
 import com.omprakashgautam.homelab.ledger.model.User;
@@ -21,34 +22,34 @@ public class TrustedPersonService {
     private final TrustedPersonRepository trustedPersonRepository;
     private final UserRepository userRepository;
 
-    public List<TrustedPerson> findAll(String email) {
+    public List<TrustedPersonResponse> findAll(String email) {
         User user = getUser(email);
-        return trustedPersonRepository.findByUserId(user.getId());
+        return trustedPersonRepository.findByUserId(user.getId()).stream()
+                .map(TrustedPersonResponse::from).toList();
     }
 
-    public TrustedPerson findById(UUID id, String email) {
-        return getOwned(id, email);
+    public TrustedPersonResponse findById(UUID id, String email) {
+        return TrustedPersonResponse.from(getOwned(id, email));
     }
 
     @Transactional
-    public TrustedPerson create(TrustedPersonRequest req, String email) {
+    public TrustedPersonResponse create(TrustedPersonRequest req, String email) {
         User user = getUser(email);
         TrustedPerson entity = mapFromRequest(req);
         entity.setUser(user);
-        return trustedPersonRepository.save(entity);
+        return TrustedPersonResponse.from(trustedPersonRepository.save(entity));
     }
 
     @Transactional
-    public TrustedPerson update(UUID id, TrustedPersonRequest req, String email) {
+    public TrustedPersonResponse update(UUID id, TrustedPersonRequest req, String email) {
         TrustedPerson entity = getOwned(id, email);
         applyUpdate(entity, req);
-        return trustedPersonRepository.save(entity);
+        return TrustedPersonResponse.from(trustedPersonRepository.save(entity));
     }
 
     @Transactional
     public void delete(UUID id, String email) {
-        TrustedPerson entity = getOwned(id, email);
-        trustedPersonRepository.delete(entity);
+        trustedPersonRepository.delete(getOwned(id, email));
     }
 
     private TrustedPerson getOwned(UUID id, String email) {
@@ -65,7 +66,23 @@ public class TrustedPersonService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    // TODO Phase 2: implement mapping
-    private TrustedPerson mapFromRequest(TrustedPersonRequest req) { return new TrustedPerson(); }
-    private void applyUpdate(TrustedPerson entity, TrustedPersonRequest req) {}
+    private TrustedPerson mapFromRequest(TrustedPersonRequest req) {
+        TrustedPerson entity = new TrustedPerson();
+        entity.setName(req.getName());
+        entity.setRelationship(req.getRelationship());
+        entity.setType(req.getType());
+        entity.setPhone(req.getPhone());
+        entity.setEmail(req.getEmail());
+        entity.setNotes(req.getNotes());
+        return entity;
+    }
+
+    private void applyUpdate(TrustedPerson entity, TrustedPersonRequest req) {
+        entity.setName(req.getName());
+        entity.setRelationship(req.getRelationship());
+        entity.setType(req.getType());
+        entity.setPhone(req.getPhone());
+        entity.setEmail(req.getEmail());
+        entity.setNotes(req.getNotes());
+    }
 }

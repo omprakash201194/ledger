@@ -1,7 +1,7 @@
 package com.omprakashgautam.homelab.ledger.controller;
 
 import com.omprakashgautam.homelab.ledger.dto.request.AssetRequest;
-import com.omprakashgautam.homelab.ledger.model.Asset;
+import com.omprakashgautam.homelab.ledger.dto.response.AssetResponse;
 import com.omprakashgautam.homelab.ledger.security.UserDetailsImpl;
 import com.omprakashgautam.homelab.ledger.service.AssetService;
 import jakarta.validation.Valid;
@@ -21,24 +21,24 @@ public class AssetController {
     private final AssetService assetService;
 
     @GetMapping
-    public ResponseEntity<List<Asset>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<List<AssetResponse>> list(@AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(assetService.findAll(principal.getUsername()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Asset> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<AssetResponse> get(@PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(assetService.findById(id, principal.getUsername()));
     }
 
     @PostMapping
-    public ResponseEntity<Asset> create(@Valid @RequestBody AssetRequest request,
-                                            @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<AssetResponse> create(@Valid @RequestBody AssetRequest request,
+                                                @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(assetService.create(request, principal.getUsername()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Asset> update(@PathVariable UUID id, @Valid @RequestBody AssetRequest request,
-                                             @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<AssetResponse> update(@PathVariable UUID id, @Valid @RequestBody AssetRequest request,
+                                                @AuthenticationPrincipal UserDetailsImpl principal) {
         return ResponseEntity.ok(assetService.update(id, request, principal.getUsername()));
     }
 

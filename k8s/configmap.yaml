@@ -10,4 +10,4 @@ metadata:
 data:
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-  FRONTEND_URL: "https://ledger.homelab.local"
+  FRONTEND_URL: "https://ledger.onelifestack.com"

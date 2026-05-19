@@ -15,11 +15,16 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**Phase 4 complete** — full CRUD feature pages for all 8 resources pushed to `develop` (commit `766bbd0`, issue #4).
+**Phase 5 complete** — Dockerfiles, nginx config, and k8s manifests pushed to `develop` (commit `cae735c`, issue #5).
 
-All 8 resource pages have list view, add/edit modal, and delete confirmation. Shared `Modal` (bottom-sheet on mobile, centered on desktop) and `FormField` + `inputCls`/`selectCls` utilities added in `components/`. TypeScript build passes with 0 errors.
+Frontend: multi-stage `node:20-alpine` → `nginx:1.27-alpine`, SPA fallback + `/api/` proxy.
+Backend: fixed Dockerfile using `maven:3.9-eclipse-temurin-21-alpine` build stage.
+k8s: configmap, backend + frontend deployments, ClusterIP services, nginx ingress (`ledger.homelab.local`, cert-manager TLS), `secret.yaml.template`.
 
-Next: **Phase 5** — frontend Dockerfile + nginx.conf, k8s manifests (backend + frontend deployment, services, ingress, configmap, sealed-secret), deploy to `https://ledger.homelab.local`.
+**Next: deploy to homelab.** Before first deploy you must:
+1. Fill in `k8s/secret.yaml.template`, seal it, delete the plaintext
+2. Add `ledger.homelab.local` to your `/etc/hosts`
+3. Merge `develop` → `main` to trigger the CI deploy job (or deploy manually — see below)
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

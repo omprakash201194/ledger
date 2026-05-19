@@ -311,7 +311,7 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 ### Phase 4 — Frontend features ✅ DONE (commit `766bbd0`, issue #4)
 14. Pages in order: Dashboard → Assets → Liabilities → Insurance → Recurring → TrustedPersons → DigitalAccounts → Will → Alerts
 
-### Phase 5 — Packaging & deploy
+### Phase 5 — Packaging & deploy ✅ DONE (commit `cae735c`, issue #5)
 15. `frontend/Dockerfile` + `nginx.conf` (proxy `/api/` to `ledger-backend:8080`)
 16. k8s manifests (backend-deployment, frontend-deployment, services, ingress, configmap, sealed-secret)
 17. Build images, push to `localhost:30500`, apply manifests, verify at `https://ledger.homelab.local`

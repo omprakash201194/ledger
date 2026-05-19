@@ -15,11 +15,11 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**Phase 3 complete** — frontend scaffold pushed to `develop` (commit `c1e83a8`, issue #3).
+**Phase 4 complete** — full CRUD feature pages for all 8 resources pushed to `develop` (commit `766bbd0`, issue #4).
 
-React 18 + Vite + TypeScript + Tailwind CSS v4 + React Router v6 + Axios + Zustand. Full API layer (9 resource modules + auth + dashboard). Auth flow working: login/register forms, Google OAuth2 button, JWT persisted in localStorage via Zustand. Layout with desktop sidebar + mobile BottomNav. DashboardPage shows live net-worth summary. All 8 resource pages are stub placeholders.
+All 8 resource pages have list view, add/edit modal, and delete confirmation. Shared `Modal` (bottom-sheet on mobile, centered on desktop) and `FormField` + `inputCls`/`selectCls` utilities added in `components/`. TypeScript build passes with 0 errors.
 
-Next: **Phase 4** — feature pages (Assets, Liabilities, Insurance, Recurring, TrustedPersons, DigitalAccounts, Will, Alerts).
+Next: **Phase 5** — frontend Dockerfile + nginx.conf, k8s manifests (backend + frontend deployment, services, ingress, configmap, sealed-secret), deploy to `https://ledger.homelab.local`.
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

@@ -308,7 +308,7 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 12. Auth pages (Login, OAuth2 callback), `ProtectedRoute`, `authStore`
 13. `Layout` + `BottomNav`
 
-### Phase 4 — Frontend features
+### Phase 4 — Frontend features ✅ DONE (commit `766bbd0`, issue #4)
 14. Pages in order: Dashboard → Assets → Liabilities → Insurance → Recurring → TrustedPersons → DigitalAccounts → Will → Alerts
 
 ### Phase 5 — Packaging & deploy

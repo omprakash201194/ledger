@@ -15,9 +15,11 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**Phase 1 complete** — backend scaffold compiled and pushed to `develop` (commit `615ca17`, issue #1).
+**Phase 2 complete** — full service implementations, response DTOs, and alert scanner pushed to `develop` (commit `01ccade`, issue #2).
 
-Backend structure is in place: entities, repositories, security layer, Liquibase migrations, and service/controller stubs. Service `mapFromRequest`/`applyUpdate` methods are stubs — Phase 2 implements full field mappings.
+All 7 CRUD services have full field mappings. All 8 controllers return response DTOs. The nightly alert scanner runs at 02:30 and generates alerts for insurance premiums (30 days), monthly obligations (7 days), will review reminders (30 days), and stale asset values (90 days).
+
+Next: **Phase 3** — frontend scaffold (React + Vite + Tailwind + Zustand).
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

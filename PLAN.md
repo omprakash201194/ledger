@@ -297,7 +297,7 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 5. JPA entities + repositories + service/controller stubs + `GlobalExceptionHandler`
 6. `Dockerfile` (multi-stage `eclipse-temurin:21-jre-alpine`) + `.gitignore`
 
-### Phase 2 — Backend features
+### Phase 2 — Backend features ✅ DONE (commit `01ccade`, issue #2)
 7. Implement `mapFromRequest` / `applyUpdate` in all 6 CRUD services (full field mappings)
 8. Implement `AlertService` nightly scanner (insurance premiums, EMIs, will review, stale assets)
 9. Response DTOs (replace returning raw JPA entities from controllers)

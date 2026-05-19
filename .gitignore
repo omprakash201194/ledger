@@ -1,0 +1,23 @@
+# Maven
+backend/target/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Secrets — never commit plaintext secrets
+**/k8s/secret.yaml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.class
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local

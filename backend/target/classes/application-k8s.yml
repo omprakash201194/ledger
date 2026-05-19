@@ -1,9 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://postgres.homelab.svc.cluster.local:5432/homelab
-    username: homelab
-    password: ${DB_PASSWORD}
-
-logging:
-  level:
-    root: INFO

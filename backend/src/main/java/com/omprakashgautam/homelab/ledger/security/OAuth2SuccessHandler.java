@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -37,6 +39,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtTokenProvider.generateTokenForUser(user);
         log.info("OAuth2 login successful for user: {}", email);
 
-        getRedirectStrategy().sendRedirect(request, response, frontendRedirectUrl + "?token=" + token);
+        String redirectUrl = frontendRedirectUrl
+                + "?token=" + token
+                + "&userId=" + user.getId()
+                + "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
+                + "&name=" + URLEncoder.encode(user.getName() != null ? user.getName() : "", StandardCharsets.UTF_8);
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

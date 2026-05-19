@@ -15,9 +15,20 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-Pre-scaffolding — no backend or frontend code exists yet. The directory layout described below is the intended target.
+**Phase 1 complete** — backend scaffold compiled and pushed to `develop` (commit `615ca17`, issue #1).
 
-See [PLAN.md](PLAN.md) for the full implementation plan: domain model, entity definitions, REST API, k8s manifests, Cloudflare tunnel setup, and build sequence.
+Backend structure is in place: entities, repositories, security layer, Liquibase migrations, and service/controller stubs. Service `mapFromRequest`/`applyUpdate` methods are stubs — Phase 2 implements full field mappings.
+
+See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
+
+## Post-commit process
+
+After every commit:
+1. Update PLAN.md — mark completed phases/steps, adjust upcoming steps if plans changed
+2. Update CLAUDE.md — reflect current status
+3. Update relevant wiki pages if architecture or APIs changed
+4. Save memory for any non-obvious decisions made during implementation
+5. Create a GitHub issue on `omprakash201194/ledger` summarising what was implemented and add it to the Life Ledger project board (#6)
 
 ## Build & run commands
 

@@ -289,31 +289,31 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 
 ## Build Sequence
 
-### Phase 1 — Backend foundation
-1. `backend/pom.xml` — Spring Boot 3.4.x, same deps as SpendStack (Web, Security, OAuth2-client, JPA, Validation, Actuator, Liquibase, PostgreSQL, JWT, Lombok, logstash-logback)
+### Phase 1 — Backend foundation ✅ DONE (commit `615ca17`, issue #1)
+1. `backend/pom.xml` — Spring Boot 3.4.5, Web, Security, OAuth2-client, JPA, Validation, Actuator, Liquibase, PostgreSQL, JWT, Lombok, logstash-logback
 2. `application.yml` + `application-local.yml` + `application-k8s.yml`
 3. `SecurityConfig` + JWT filter + OAuth2 success handler (ported from SpendStack)
-4. Liquibase migrations 001–009
-5. JPA entities + repositories
+4. Liquibase migrations 001–009 (`ldg_` prefixed tables)
+5. JPA entities + repositories + service/controller stubs + `GlobalExceptionHandler`
+6. `Dockerfile` (multi-stage `eclipse-temurin:21-jre-alpine`) + `.gitignore`
 
 ### Phase 2 — Backend features
-6. Services + controllers for each entity (Assets → Liabilities → Insurance → Recurring → TrustedPersons → DigitalAccounts → Will → Dashboard)
-7. `AlertService` with `@Scheduled` scanner
-8. `GlobalExceptionHandler`
+7. Implement `mapFromRequest` / `applyUpdate` in all 6 CRUD services (full field mappings)
+8. Implement `AlertService` nightly scanner (insurance premiums, EMIs, will review, stale assets)
+9. Response DTOs (replace returning raw JPA entities from controllers)
 
 ### Phase 3 — Frontend foundation
-9. `npm create vite@latest` — React + TypeScript
-10. Tailwind CSS, React Router, Axios, Zustand
-11. Auth pages (Login, OAuth2 callback), `ProtectedRoute`, `authStore`
-12. `Layout` + `BottomNav`
+10. `npm create vite@latest` — React + TypeScript
+11. Tailwind CSS, React Router, Axios, Zustand
+12. Auth pages (Login, OAuth2 callback), `ProtectedRoute`, `authStore`
+13. `Layout` + `BottomNav`
 
 ### Phase 4 — Frontend features
-13. Pages in order: Dashboard → Assets → Liabilities → Insurance → Recurring → TrustedPersons → DigitalAccounts → Will → Alerts
+14. Pages in order: Dashboard → Assets → Liabilities → Insurance → Recurring → TrustedPersons → DigitalAccounts → Will → Alerts
 
 ### Phase 5 — Packaging & deploy
-14. `backend/Dockerfile` (multi-stage: Maven build → eclipse-temurin:21-jre-alpine)
 15. `frontend/Dockerfile` + `nginx.conf` (proxy `/api/` to `ledger-backend:8080`)
-16. k8s manifests
+16. k8s manifests (backend-deployment, frontend-deployment, services, ingress, configmap, sealed-secret)
 17. Build images, push to `localhost:30500`, apply manifests, verify at `https://ledger.homelab.local`
 
 ### Phase 6 — Public exposure

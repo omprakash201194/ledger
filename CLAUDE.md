@@ -9,22 +9,24 @@ Ledger is a self-hosted **Family Financial Digital Legacy Register** — a perso
 - **Backend:** Spring Boot 3.x, Java 21, Maven, `application.yml`
 - **Frontend:** React 18, Vite, Tailwind CSS
 - **Database:** shared homelab PostgreSQL (`postgres.homelab.svc.cluster.local:5432`)
-- **Deployment:** k3s in `homelab` namespace, exposed via `https://ledger.homelab.local`
+- **Deployment:** k3s in `homelab` namespace, exposed via `https://ledger.homelab.local` (internal) and `https://ledger.onelifestack.com` (public, Cloudflare Tunnel)
 
 A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in the repo root illustrates the intended domain model and field structure.
 
 ## Current status
 
-**Phase 5 complete** — Dockerfiles, nginx config, and k8s manifests pushed to `develop` (commit `cae735c`, issue #5).
+**All 6 phases complete. App is live.**
 
-Frontend: multi-stage `node:20-alpine` → `nginx:1.27-alpine`, SPA fallback + `/api/` proxy.
-Backend: fixed Dockerfile using `maven:3.9-eclipse-temurin-21-alpine` build stage.
-k8s: configmap, backend + frontend deployments, ClusterIP services, nginx ingress (`ledger.homelab.local`, cert-manager TLS), `secret.yaml.template`.
+- Internal: `https://ledger.homelab.local`
+- Public: `https://ledger.onelifestack.com` (Cloudflare Tunnel)
+- Auth: email/password + Google OAuth2 both working
+- CI/CD: GitHub Actions deploys on every push to `main` via self-hosted runner
 
-**Next: deploy to homelab.** Before first deploy you must:
-1. Fill in `k8s/secret.yaml.template`, seal it, delete the plaintext
-2. Add `ledger.homelab.local` to your `/etc/hosts`
-3. Merge `develop` → `main` to trigger the CI deploy job (or deploy manually — see below)
+**OAuth2 gotchas learned during deployment** (already fixed in code):
+- Google rejects `.local` TLDs — use the public domain for OAuth2 credentials
+- Cloudflare Tunnel terminates TLS so `{baseUrl}` in Spring resolves to `http://` — hardcode the full `redirect-uri` in `application.yml`
+- Cloudflare Tunnel → point to `http://ledger-frontend.homelab.svc.cluster.local:80` (HTTP, not the ingress hostname)
+- `OAuth2SuccessHandler` must include `userId`, `email`, `name` in the callback redirect — the frontend needs all four params
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

@@ -316,9 +316,14 @@ The nginx ingress handles the internal TLS. Cloudflare terminates the public-fac
 16. k8s manifests (backend-deployment, frontend-deployment, services, ingress, configmap, sealed-secret)
 17. Build images, push to `localhost:30500`, apply manifests, verify at `https://ledger.homelab.local`
 
-### Phase 6 — Public exposure
+### Phase 6 — Public exposure ✅ DONE (commit `623c13d`, issue #6)
 18. Add public hostname rule in Cloudflare dashboard
-19. Verify at `https://ledger.<yourdomain>.com`
+19. Verify at `https://ledger.onelifestack.com`
+
+Three OAuth2 fixes required during deployment:
+- Used `ledger.onelifestack.com` (Google rejects `.local` TLDs)
+- Hardcoded `redirect-uri` in `application.yml` (Cloudflare terminates TLS so `{baseUrl}` resolves to `http://`)
+- `OAuth2SuccessHandler` was missing `userId`, `email`, `name` in the callback redirect URL
 
 ---
 

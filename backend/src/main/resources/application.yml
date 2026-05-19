@@ -15,8 +15,7 @@ spring:
             scope:
               - email
               - profile
-            # Keep callback under /api/ so nginx proxies it to the backend
-            redirect-uri: "{baseUrl}/api/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://ledger.onelifestack.com/api/login/oauth2/code/google"
   jpa:
     hibernate:
       ddl-auto: validate

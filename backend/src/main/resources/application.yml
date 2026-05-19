@@ -1,3 +1,7 @@
+server:
+  # Trust X-Forwarded-Proto from Cloudflare/nginx so Spring generates https:// URLs
+  forward-headers-strategy: native
+
 spring:
   application:
     name: ledger-backend
@@ -11,6 +15,8 @@ spring:
             scope:
               - email
               - profile
+            # Keep callback under /api/ so nginx proxies it to the backend
+            redirect-uri: "{baseUrl}/api/login/oauth2/code/{registrationId}"
   jpa:
     hibernate:
       ddl-auto: validate

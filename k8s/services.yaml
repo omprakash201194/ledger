@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ledger-backend
+  namespace: homelab
+  labels:
+    app: ledger-backend
+    env: homelab
+    managed-by: kubectl
+spec:
+  selector:
+    app: ledger-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ledger-frontend
+  namespace: homelab
+  labels:
+    app: ledger-frontend
+    env: homelab
+    managed-by: kubectl
+spec:
+  selector:
+    app: ledger-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

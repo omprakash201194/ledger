@@ -30,17 +30,6 @@ jobs:
       - name: Run tests
         run: mvn -f backend/pom.xml test -B
 
-      - name: Package (skip tests)
-        if: github.ref == 'refs/heads/main'
-        run: mvn -f backend/pom.xml package -DskipTests -B
-
-      - name: Upload backend jar
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/ledger-*.jar
-          retention-days: 1
 
   # ── Frontend: lint + build ───────────────────────────────────────────────────
   frontend:
@@ -62,13 +51,6 @@ jobs:
       - name: Type-check + build
         run: npm run build --prefix frontend
 
-      - name: Upload frontend dist
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist/
-          retention-days: 1
 
   # ── Deploy: build images + push + kubectl ────────────────────────────────────
   # Runs on a self-hosted runner registered on the homelab server.
@@ -90,18 +72,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download backend jar
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/
-
-      - name: Download frontend dist
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist/
 
       - name: Build & push backend image
         run: |

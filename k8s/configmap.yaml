@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ledger-config
+  namespace: homelab
+  labels:
+    app: ledger
+    env: homelab
+    managed-by: kubectl
+data:
+  SPRING_PROFILES_ACTIVE: "k8s"
+  JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+  FRONTEND_URL: "https://ledger.homelab.local"

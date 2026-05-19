@@ -1,13 +1,12 @@
 # --- Build stage ---
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 COPY pom.xml .
-COPY src ./src
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B -q
 
-RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw package -DskipTests -B 2>/dev/null || \
-    (apt-get install -y maven 2>/dev/null; mvn package -DskipTests -B)
+COPY src ./src
+RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests -B -q
 
 # --- Runtime stage ---
 FROM eclipse-temurin:21-jre-alpine
@@ -19,4 +18,4 @@ COPY --from=build /app/target/ledger-*.jar app.jar
 
 USER ledger
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

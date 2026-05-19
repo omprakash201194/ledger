@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ledger-ingress
+  namespace: homelab
+  labels:
+    app: ledger
+    env: homelab
+    managed-by: kubectl
+  annotations:
+    cert-manager.io/cluster-issuer: "homelab-ca-issuer"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - ledger.homelab.local
+      secretName: ledger-tls
+  rules:
+    - host: ledger.homelab.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ledger-frontend
+                port:
+                  number: 80

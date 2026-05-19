@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/homelab
+    username: homelab
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: true
+
+app:
+  oauth2:
+    frontend-redirect-url: http://localhost:5173/oauth2/callback
+
+logging:
+  level:
+    com.omprakashgautam.homelab.ledger: DEBUG

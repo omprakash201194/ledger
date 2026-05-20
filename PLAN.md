@@ -327,11 +327,21 @@ Three OAuth2 fixes required during deployment:
 
 ---
 
+## Post-MVP additions
+
+### Email-based password reset ✅ DONE (commit `6482ae5`, issue #7)
+- `spring-boot-starter-mail` + Gmail SMTP (port 587 / STARTTLS)
+- `ldg_password_reset_tokens` table — SHA-256 hashed UUID token, 1-hour expiry, auto-cleared on new request
+- `PasswordResetService` — generate, email, validate, update password
+- Two new public endpoints: `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`
+- Frontend: `ForgotPasswordPage`, `ResetPasswordPage`, "Forgot password?" link on `LoginPage`
+- Gmail App Password stored as `GMAIL_APP_PASSWORD` in `ledger-secret` (SealedSecret)
+- Mail health indicator excluded from readiness probe (`management.health.mail.enabled: false`)
+
 ## What is explicitly out of scope
 
 - Credential vault (encrypted password storage)
 - PDF / Excel export
 - Dead-man's switch / inactivity trigger
 - Nominee mismatch alerts (post-MVP)
-- Email / push notifications
 - Multi-household / shared access for trusted persons (post-MVP — trusted persons are records only, not app users)

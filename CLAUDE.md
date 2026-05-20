@@ -15,18 +15,24 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**All 6 phases complete. App is live.**
+**All 6 phases complete + password reset added. App is live.**
 
 - Internal: `https://ledger.homelab.local`
 - Public: `https://ledger.onelifestack.com` (Cloudflare Tunnel)
-- Auth: email/password + Google OAuth2 both working
+- Auth: email/password + Google OAuth2 + forgot-password email flow, all working
 - CI/CD: GitHub Actions deploys on every push to `main` via self-hosted runner
+- Images: `ledger-backend:1.1.0`, `ledger-frontend:1.1.0`
 
 **OAuth2 gotchas learned during deployment** (already fixed in code):
 - Google rejects `.local` TLDs — use the public domain for OAuth2 credentials
 - Cloudflare Tunnel terminates TLS so `{baseUrl}` in Spring resolves to `http://` — hardcode the full `redirect-uri` in `application.yml`
 - Cloudflare Tunnel → point to `http://ledger-frontend.homelab.svc.cluster.local:80` (HTTP, not the ingress hostname)
 - `OAuth2SuccessHandler` must include `userId`, `email`, `name` in the callback redirect — the frontend needs all four params
+
+**Gmail SMTP gotchas** (already fixed in code):
+- `management.health.mail.enabled: false` — mail health check makes readiness probe fail if SMTP is slow; disable it
+- Gmail App Password must be 16 chars with spaces stripped; verify with a direct `smtplib` test before resealing
+- SealedSecret controller syncs asynchronously — always wait for sync before restarting the pod
 
 See [PLAN.md](PLAN.md) for the full implementation plan with phase completion status.
 

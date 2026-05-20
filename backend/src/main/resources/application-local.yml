@@ -9,6 +9,7 @@ spring:
 app:
   oauth2:
     frontend-redirect-url: http://localhost:5173/oauth2/callback
+  frontend-url: http://localhost:5173
 
 logging:
   level:

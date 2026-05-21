@@ -5,6 +5,8 @@ import {
 } from '../api/trustedPersons'
 import Modal from '../components/Modal'
 import { FormField, inputCls, selectCls } from '../components/FormField'
+import SkeletonCard from '../components/SkeletonCard'
+import { useToastStore } from '../store/toastStore'
 
 const TYPES: TrustedPersonType[] = ['FAMILY', 'ADVISOR', 'EXECUTOR']
 
@@ -24,6 +26,7 @@ export default function TrustedPersonsPage() {
   const [form, setForm] = useState<TrustedPersonRequest>(blank)
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const toast = useToastStore()
 
   const load = () =>
     getTrustedPersons().then(r => { setPersons(r.data); setLoading(false) })
@@ -38,18 +41,31 @@ export default function TrustedPersonsPage() {
   }
 
   const save = async () => {
+    if (!form.name.trim()) return
     setSaving(true)
     try {
-      if (editing) await updateTrustedPerson(editing.id, form)
-      else await createTrustedPerson(form)
+      if (editing) {
+        await updateTrustedPerson(editing.id, form)
+        toast.show('Person updated ✓')
+      } else {
+        await createTrustedPerson(form)
+        toast.show('Person added ✓')
+      }
       setShowModal(false)
       load()
+    } catch {
+      toast.show('Failed to save', 'error')
     } finally { setSaving(false) }
   }
 
   const confirmDelete = async () => {
     if (!deleteId) return
-    await deleteTrustedPerson(deleteId)
+    try {
+      await deleteTrustedPerson(deleteId)
+      toast.show('Person removed')
+    } catch {
+      toast.show('Failed to delete', 'error')
+    }
     setDeleteId(null)
     load()
   }
@@ -69,11 +85,14 @@ export default function TrustedPersonsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading…</p>
+        <SkeletonCard rows={3} />
       ) : persons.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <p className="text-4xl mb-3">👥</p>
-          <p className="text-sm">No trusted persons yet. Add someone your family should contact.</p>
+          <p className="text-sm mb-4">No trusted persons yet. Add someone your family should contact.</p>
+          <button onClick={openAdd} className="text-sm text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50">
+            + Add your first contact
+          </button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -104,18 +123,30 @@ export default function TrustedPersonsPage() {
         <Modal title={editing ? 'Edit Person' : 'Add Trusted Person'} onClose={() => setShowModal(false)}>
           <div className="space-y-4">
             <FormField label="Name" required>
-              <input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" />
+              <input
+                className={inputCls}
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                onKeyDown={e => e.key === 'Enter' && save()}
+                placeholder="Full name"
+              />
             </FormField>
             <FormField label="Type" required>
               <select className={selectCls} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as TrustedPersonType }))}>
                 {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </FormField>
-            <FormField label="Relationship">
+            <FormField label="Relationship" hint="e.g. Spouse, Brother, CA, Lawyer">
               <input className={inputCls} value={form.relationship ?? ''} onChange={e => set('relationship', e.target.value)} placeholder="e.g. Spouse, Brother, CA" />
             </FormField>
             <FormField label="Phone">
-              <input className={inputCls} value={form.phone ?? ''} onChange={e => set('phone', e.target.value)} placeholder="+91 98765 43210" />
+              <input
+                className={inputCls}
+                value={form.phone ?? ''}
+                onChange={e => set('phone', e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && save()}
+                placeholder="+91 98765 43210"
+              />
             </FormField>
             <FormField label="Email">
               <input className={inputCls} type="email" value={form.email ?? ''} onChange={e => set('email', e.target.value)} placeholder="email@example.com" />

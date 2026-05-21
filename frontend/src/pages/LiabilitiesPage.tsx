@@ -6,6 +6,9 @@ import {
 import { getAssets, type Asset } from '../api/assets'
 import Modal from '../components/Modal'
 import { FormField, inputCls, selectCls } from '../components/FormField'
+import SkeletonCard from '../components/SkeletonCard'
+import { useToastStore } from '../store/toastStore'
+import { timeAgo } from '../utils/timeAgo'
 
 const LIABILITY_TYPES: LiabilityType[] = ['HOME_LOAN','CAR_LOAN','PERSONAL_LOAN','EDUCATION_LOAN','CREDIT_CARD','OTHER']
 
@@ -23,6 +26,9 @@ export default function LiabilitiesPage() {
   const [form, setForm] = useState<LiabilityRequest>(blank)
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [formDirty, setFormDirty] = useState(false)
+  const [showDiscard, setShowDiscard] = useState(false)
+  const toast = useToastStore()
 
   const load = () =>
     Promise.all([getLiabilities(), getAssets()]).then(([l, a]) => {
@@ -33,7 +39,7 @@ export default function LiabilitiesPage() {
 
   const total = liabilities.reduce((s, l) => s + (l.outstandingBalance ?? 0), 0)
 
-  const openAdd = () => { setEditing(null); setForm(blank); setShowModal(true) }
+  const openAdd = () => { setEditing(null); setForm(blank); setFormDirty(false); setShowModal(true) }
   const openEdit = (l: Liability) => {
     setEditing(l)
     setForm({
@@ -42,28 +48,47 @@ export default function LiabilitiesPage() {
       outstandingBalance: l.outstandingBalance, emiAmount: l.emiAmount,
       tenureEndDate: l.tenureEndDate, linkedAssetId: l.linkedAssetId, remarks: l.remarks,
     })
+    setFormDirty(false)
     setShowModal(true)
+  }
+
+  const tryClose = () => {
+    if (formDirty) { setShowDiscard(true) } else { setShowModal(false) }
   }
 
   const save = async () => {
     setSaving(true)
     try {
-      if (editing) await updateLiability(editing.id, form)
-      else await createLiability(form)
+      if (editing) {
+        await updateLiability(editing.id, form)
+        toast.show('Liability updated ✓')
+      } else {
+        await createLiability(form)
+        toast.show('Liability added ✓')
+      }
       setShowModal(false)
       load()
+    } catch {
+      toast.show('Failed to save', 'error')
     } finally { setSaving(false) }
   }
 
   const confirmDelete = async () => {
     if (!deleteId) return
-    await deleteLiability(deleteId)
+    try {
+      await deleteLiability(deleteId)
+      toast.show('Liability deleted')
+    } catch {
+      toast.show('Failed to delete', 'error')
+    }
     setDeleteId(null)
     load()
   }
 
-  const set = (k: keyof LiabilityRequest, v: string | number | undefined) =>
+  const set = (k: keyof LiabilityRequest, v: string | number | undefined) => {
+    setFormDirty(true)
     setForm(f => ({ ...f, [k]: v === '' ? undefined : v }))
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
@@ -78,11 +103,14 @@ export default function LiabilitiesPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading…</p>
+        <SkeletonCard rows={3} />
       ) : liabilities.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <p className="text-4xl mb-3">💳</p>
-          <p className="text-sm">No liabilities recorded. Add loans or credit card debts.</p>
+          <p className="text-sm mb-4">No liabilities recorded. Add loans or credit card debts.</p>
+          <button onClick={openAdd} className="text-sm text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50">
+            + Add your first liability
+          </button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -103,6 +131,7 @@ export default function LiabilitiesPage() {
                   <span className="text-sm font-semibold text-red-600">{fmt(l.outstandingBalance)}</span>
                   {l.originalAmount && <span className="text-xs text-gray-400 ml-2">of {fmt(l.originalAmount)}</span>}
                 </div>
+                <p className="text-xs text-gray-300 mt-1">Updated {timeAgo(l.updatedAt)}</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button onClick={() => openEdit(l)} className="text-xs text-indigo-600 hover:underline">Edit</button>
@@ -114,17 +143,17 @@ export default function LiabilitiesPage() {
       )}
 
       {showModal && (
-        <Modal title={editing ? 'Edit Liability' : 'Add Liability'} onClose={() => setShowModal(false)}>
+        <Modal title={editing ? 'Edit Liability' : 'Add Liability'} onClose={tryClose}>
           <div className="space-y-4">
             <FormField label="Type" required>
-              <select className={selectCls} value={form.liabilityType} onChange={e => setForm(f => ({ ...f, liabilityType: e.target.value as LiabilityType }))}>
+              <select className={selectCls} value={form.liabilityType} onChange={e => { setFormDirty(true); setForm(f => ({ ...f, liabilityType: e.target.value as LiabilityType })) }}>
                 {LIABILITY_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
               </select>
             </FormField>
             <FormField label="Lender" required>
-              <input className={inputCls} value={form.lender} onChange={e => setForm(f => ({ ...f, lender: e.target.value }))} placeholder="e.g. HDFC Bank, SBI" />
+              <input className={inputCls} value={form.lender} onChange={e => { setFormDirty(true); setForm(f => ({ ...f, lender: e.target.value })) }} placeholder="e.g. HDFC Bank, SBI" />
             </FormField>
-            <FormField label="Account Number">
+            <FormField label="Account Number" hint="Last 4 digits or masked number is fine">
               <input className={inputCls} value={form.accountNumber ?? ''} onChange={e => set('accountNumber', e.target.value)} placeholder="Masked (last 4 digits OK)" />
             </FormField>
             <FormField label="Original Amount (₹)">
@@ -152,8 +181,18 @@ export default function LiabilitiesPage() {
               <button onClick={save} disabled={saving || !form.lender.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg">
                 {saving ? 'Saving…' : editing ? 'Save changes' : 'Add liability'}
               </button>
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
+              <button onClick={tryClose} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {showDiscard && (
+        <Modal title="Discard changes?" onClose={() => setShowDiscard(false)}>
+          <p className="text-sm text-gray-600 mb-4">You have unsaved changes. Discard them?</p>
+          <div className="flex gap-3">
+            <button onClick={() => { setShowDiscard(false); setShowModal(false) }} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-lg">Discard</button>
+            <button onClick={() => setShowDiscard(false)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Keep editing</button>
           </div>
         </Modal>
       )}

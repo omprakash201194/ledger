@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import BottomNav from './BottomNav'
+import Toast from './Toast'
+import { getNetWorth } from '../api/dashboard'
 
 const sidebarItems = [
   { to: '/', label: 'Dashboard', icon: '🏠' },
@@ -11,12 +14,19 @@ const sidebarItems = [
   { to: '/trusted-persons', label: 'Trusted Persons', icon: '👥' },
   { to: '/digital-accounts', label: 'Digital Accounts', icon: '🔐' },
   { to: '/will', label: 'Will', icon: '📜' },
-  { to: '/alerts', label: 'Alerts', icon: '🔔' },
+  { to: '/alerts', label: 'Alerts', icon: '🔔', isAlerts: true },
 ]
 
 export default function Layout() {
   const { name, logout } = useAuthStore()
   const navigate = useNavigate()
+  const [unreadAlerts, setUnreadAlerts] = useState(0)
+
+  useEffect(() => {
+    getNetWorth()
+      .then(r => setUnreadAlerts(r.data.unreadAlertCount))
+      .catch(() => {/* silent */})
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -38,15 +48,22 @@ export default function Layout() {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                `flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
                     ? 'bg-indigo-50 text-indigo-700 font-medium'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`
               }
             >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="flex items-center gap-3">
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </span>
+              {item.isAlerts && unreadAlerts > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
+                  {unreadAlerts > 99 ? '99+' : unreadAlerts}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -65,7 +82,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <BottomNav />
+      <BottomNav unreadAlerts={unreadAlerts} />
+      <Toast />
     </div>
   )
 }

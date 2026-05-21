@@ -5,6 +5,9 @@ import {
 } from '../api/digitalAccounts'
 import Modal from '../components/Modal'
 import { FormField, inputCls, selectCls } from '../components/FormField'
+import SkeletonCard from '../components/SkeletonCard'
+import { useToastStore } from '../store/toastStore'
+import { timeAgo } from '../utils/timeAgo'
 
 const CATEGORIES: DigitalAccountCategory[] = ['PASSWORD_MANAGER','EMAIL','BANKING','INVESTMENT','SOCIAL_MEDIA','GOVERNMENT','SUBSCRIPTION','OTHER']
 const ACTIONS: ActionOnDeath[] = ['TRANSFER','ARCHIVE','CLOSE','MEMORIALIZE']
@@ -24,6 +27,7 @@ export default function DigitalAccountsPage() {
   const [form, setForm] = useState<DigitalAccountRequest>(blank)
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const toast = useToastStore()
 
   const load = () =>
     getDigitalAccounts().then(r => { setAccounts(r.data); setLoading(false) })
@@ -50,16 +54,28 @@ export default function DigitalAccountsPage() {
   const save = async () => {
     setSaving(true)
     try {
-      if (editing) await updateDigitalAccount(editing.id, form)
-      else await createDigitalAccount(form)
+      if (editing) {
+        await updateDigitalAccount(editing.id, form)
+        toast.show('Account updated ✓')
+      } else {
+        await createDigitalAccount(form)
+        toast.show('Account added ✓')
+      }
       setShowModal(false)
       load()
+    } catch {
+      toast.show('Failed to save', 'error')
     } finally { setSaving(false) }
   }
 
   const confirmDelete = async () => {
     if (!deleteId) return
-    await deleteDigitalAccount(deleteId)
+    try {
+      await deleteDigitalAccount(deleteId)
+      toast.show('Account deleted')
+    } catch {
+      toast.show('Failed to delete', 'error')
+    }
     setDeleteId(null)
     load()
   }
@@ -80,11 +96,14 @@ export default function DigitalAccountsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading…</p>
+        <SkeletonCard rows={3} />
       ) : accounts.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <p className="text-4xl mb-3">🌐</p>
-          <p className="text-sm">No digital accounts yet. Document where your credentials live.</p>
+          <p className="text-sm mb-4">No digital accounts yet. Document where your credentials live.</p>
+          <button onClick={openAdd} className="text-sm text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50">
+            + Add your first account
+          </button>
         </div>
       ) : (
         <div className="space-y-6">
@@ -104,6 +123,7 @@ export default function DigitalAccountsPage() {
                         {a.twoFaMethod && <span className="text-xs text-gray-400">2FA: {a.twoFaMethod}</span>}
                         {a.actionOnDeath && <span className="text-xs text-orange-500">{a.actionOnDeath}</span>}
                       </div>
+                      <p className="text-xs text-gray-300 mt-1">Updated {timeAgo(a.updatedAt)}</p>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => openEdit(a)} className="text-xs text-indigo-600 hover:underline">Edit</button>
@@ -131,16 +151,16 @@ export default function DigitalAccountsPage() {
             <FormField label="Username / Email">
               <input className={inputCls} value={form.username ?? ''} onChange={e => set('username', e.target.value)} placeholder="Login username or email" />
             </FormField>
-            <FormField label="Credential Location">
+            <FormField label="Credential Location" hint="Where is the password stored? e.g. Bitwarden, written in diary">
               <input className={inputCls} value={form.credentialLocation ?? ''} onChange={e => set('credentialLocation', e.target.value)} placeholder="e.g. In Bitwarden vault" />
             </FormField>
-            <FormField label="2FA Method">
+            <FormField label="2FA Method" hint="e.g. Authenticator app, SMS OTP, hardware key">
               <input className={inputCls} value={form.twoFaMethod ?? ''} onChange={e => set('twoFaMethod', e.target.value)} placeholder="e.g. Authenticator app, SMS" />
             </FormField>
-            <FormField label="Recovery Contact">
+            <FormField label="Recovery Contact" hint="Backup email or phone for account recovery">
               <input className={inputCls} value={form.recoveryContact ?? ''} onChange={e => set('recoveryContact', e.target.value)} placeholder="Recovery email or phone" />
             </FormField>
-            <FormField label="Action on Death">
+            <FormField label="Action on Death" hint="What should happen to this account">
               <select className={selectCls} value={form.actionOnDeath ?? ''} onChange={e => set('actionOnDeath', e.target.value)}>
                 <option value="">— Not set —</option>
                 {ACTIONS.map(a => <option key={a} value={a}>{a}</option>)}

@@ -16,4 +16,8 @@ public interface AlertRepository extends JpaRepository<Alert, UUID> {
     @Modifying
     @Query("UPDATE Alert a SET a.isRead = true WHERE a.user.id = :userId")
     void markAllReadByUserId(UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM Alert a WHERE a.user.id = :userId AND a.alertType = :alertType AND a.isRead = false")
+    void deleteUnreadByUserIdAndAlertType(UUID userId, AlertType alertType);
 }

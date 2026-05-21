@@ -161,8 +161,8 @@ export default function InsurancePage() {
             <FormField label="Maturity Date">
               <input className={inputCls} type="date" value={form.maturityDate ?? ''} onChange={e => set('maturityDate', e.target.value)} />
             </FormField>
-            <FormField label="Document Location">
-              <input className={inputCls} value={form.documentLocation ?? ''} onChange={e => set('documentLocation', e.target.value)} placeholder="Where is the policy document?" />
+            <FormField label="Location of original documents">
+              <input className={inputCls} value={form.documentLocation ?? ''} onChange={e => set('documentLocation', e.target.value)} placeholder="e.g. Home safe, bank locker, digital in Bitwarden" />
             </FormField>
             <FormField label="Remarks">
               <textarea className={inputCls} rows={2} value={form.remarks ?? ''} onChange={e => set('remarks', e.target.value)} placeholder="Any additional notes…" />

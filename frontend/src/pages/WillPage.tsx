@@ -68,6 +68,29 @@ export default function WillPage() {
           <label htmlFor="hasWill" className="text-sm font-medium text-gray-700">I have a Will</label>
         </div>
 
+        {!form.hasWill && (
+          <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 space-y-2">
+            <h3 className="text-sm font-semibold text-amber-800">Why a Will matters</h3>
+            <p className="text-xs text-amber-700 leading-relaxed">
+              Without a Will, Indian succession law decides who inherits your assets —
+              which may not reflect your wishes. Nominations on bank accounts and
+              insurance policies do not override succession law for all assets.
+              A registered Will is the definitive instruction.
+            </p>
+            <ul className="text-xs text-amber-700 list-disc list-inside space-y-1">
+              <li>Protects your spouse and children</li>
+              <li>Prevents disputes among family members</li>
+              <li>Covers assets that nominations alone do not</li>
+            </ul>
+            <a
+              href="#"
+              className="inline-block mt-1 text-xs font-medium text-amber-900 underline hover:text-amber-700"
+            >
+              Get help drafting a Will →
+            </a>
+          </div>
+        )}
+
         {form.hasWill && (
           <>
             <FormField label="Will Type">

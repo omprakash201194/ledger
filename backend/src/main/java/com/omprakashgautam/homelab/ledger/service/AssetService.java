@@ -78,6 +78,7 @@ public class AssetService {
         entity.setJointHolderName(req.getJointHolderName());
         entity.setApproxValue(req.getApproxValue());
         entity.setValueAsOf(req.getValueAsOf());
+        entity.setMaturityDate(req.getMaturityDate());
         entity.setDocumentLocation(req.getDocumentLocation());
         entity.setRemarks(req.getRemarks());
         if (req.getTrustedPersonId() != null) {
@@ -96,6 +97,7 @@ public class AssetService {
         entity.setJointHolderName(req.getJointHolderName());
         entity.setApproxValue(req.getApproxValue());
         entity.setValueAsOf(req.getValueAsOf());
+        entity.setMaturityDate(req.getMaturityDate());
         entity.setDocumentLocation(req.getDocumentLocation());
         entity.setRemarks(req.getRemarks());
         if (req.getTrustedPersonId() != null) {

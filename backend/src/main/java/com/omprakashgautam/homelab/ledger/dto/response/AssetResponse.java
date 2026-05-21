@@ -23,6 +23,7 @@ public class AssetResponse {
     private String trustedPersonName;
     private BigDecimal approxValue;
     private LocalDate valueAsOf;
+    private LocalDate maturityDate;
     private String documentLocation;
     private String remarks;
     private LocalDateTime createdAt;
@@ -36,6 +37,7 @@ public class AssetResponse {
                 .trustedPersonId(a.getTrustedPerson() != null ? a.getTrustedPerson().getId() : null)
                 .trustedPersonName(a.getTrustedPerson() != null ? a.getTrustedPerson().getName() : null)
                 .approxValue(a.getApproxValue()).valueAsOf(a.getValueAsOf())
+                .maturityDate(a.getMaturityDate())
                 .documentLocation(a.getDocumentLocation()).remarks(a.getRemarks())
                 .createdAt(a.getCreatedAt()).updatedAt(a.getUpdatedAt())
                 .build();

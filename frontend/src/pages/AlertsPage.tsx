@@ -5,16 +5,24 @@ const typeLabel: Record<AlertType, string> = {
   INSURANCE_PREMIUM_DUE: 'Premium Due',
   EMI_DUE: 'EMI Due',
   WILL_REVIEW_DUE: 'Will Review',
+  WILL_NO_REVIEW: 'Will Not Reviewed',
   OBLIGATION_REVIEW: 'Obligation',
   ASSET_VALUE_STALE: 'Stale Value',
+  NOMINEE_MISSING: 'Nominee Missing',
+  FD_MATURITY_DUE: 'FD Maturing',
+  EMI_ENDING_SOON: 'EMI Ending',
 }
 
 const typeColor: Record<AlertType, string> = {
   INSURANCE_PREMIUM_DUE: 'bg-orange-100 text-orange-700',
   EMI_DUE: 'bg-red-100 text-red-700',
   WILL_REVIEW_DUE: 'bg-purple-100 text-purple-700',
+  WILL_NO_REVIEW: 'bg-purple-100 text-purple-700',
   OBLIGATION_REVIEW: 'bg-amber-100 text-amber-700',
   ASSET_VALUE_STALE: 'bg-blue-100 text-blue-700',
+  NOMINEE_MISSING: 'bg-yellow-100 text-yellow-700',
+  FD_MATURITY_DUE: 'bg-teal-100 text-teal-700',
+  EMI_ENDING_SOON: 'bg-rose-100 text-rose-700',
 }
 
 export default function AlertsPage() {

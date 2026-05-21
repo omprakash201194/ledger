@@ -1,8 +1,10 @@
 import client from './client'
 
 export type AlertType =
-  | 'INSURANCE_PREMIUM_DUE' | 'EMI_DUE' | 'WILL_REVIEW_DUE'
+  | 'INSURANCE_PREMIUM_DUE' | 'EMI_DUE'
+  | 'WILL_REVIEW_DUE' | 'WILL_NO_REVIEW'
   | 'OBLIGATION_REVIEW' | 'ASSET_VALUE_STALE'
+  | 'NOMINEE_MISSING' | 'FD_MATURITY_DUE' | 'EMI_ENDING_SOON'
 
 export interface Alert {
   id: string

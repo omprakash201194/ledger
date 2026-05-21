@@ -7,7 +7,34 @@ import { getTrustedPersons, type TrustedPerson } from '../api/trustedPersons'
 import Modal from '../components/Modal'
 import { FormField, inputCls, selectCls } from '../components/FormField'
 
-const ASSET_TYPES: AssetType[] = ['SAVINGS_ACCOUNT','FIXED_DEPOSIT','PPF','EPF','MUTUAL_FUND','EQUITY','GOLD','REAL_ESTATE','VEHICLE','OTHER']
+const ASSET_TYPE_GROUPS: { label: string; types: AssetType[] }[] = [
+  { label: 'Bank & Deposits',       types: ['SAVINGS_ACCOUNT', 'CURRENT_ACCOUNT', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'] },
+  { label: 'Retirement & Savings',  types: ['PPF', 'EPF', 'NPS'] },
+  { label: 'Investments',           types: ['MUTUAL_FUND', 'EQUITY'] },
+  { label: 'Physical Assets',       types: ['GOLD', 'REAL_ESTATE', 'VEHICLE', 'BANK_LOCKER'] },
+  { label: 'Other',                 types: ['OTHER'] },
+]
+
+const ASSET_TYPE_LABELS: Record<AssetType, string> = {
+  SAVINGS_ACCOUNT:   'Savings Account',
+  CURRENT_ACCOUNT:   'Current Account',
+  FIXED_DEPOSIT:     'Fixed Deposit',
+  RECURRING_DEPOSIT: 'Recurring Deposit',
+  PPF:               'PPF',
+  EPF:               'EPF',
+  NPS:               'NPS',
+  MUTUAL_FUND:       'Mutual Fund',
+  EQUITY:            'Equity / Stocks',
+  GOLD:              'Gold',
+  REAL_ESTATE:       'Real Estate',
+  VEHICLE:           'Vehicle',
+  BANK_LOCKER:       'Bank Locker',
+  OTHER:             'Other',
+}
+
+// Asset types that can have a maturity date
+const MATURITY_TYPES: AssetType[] = ['FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'NPS']
+
 const HOLDING_MODES: HoldingMode[] = ['SINGLE','JOINT','EITHER_OR_SURVIVOR']
 
 const fmt = (n?: number) =>
@@ -42,6 +69,7 @@ export default function AssetsPage() {
       institution: a.institution, accountNumber: a.accountNumber,
       jointHolderName: a.jointHolderName, trustedPersonId: a.trustedPersonId,
       approxValue: a.approxValue, valueAsOf: a.valueAsOf,
+      maturityDate: a.maturityDate,
       documentLocation: a.documentLocation, remarks: a.remarks,
     })
     setShowModal(true)
@@ -93,7 +121,7 @@ export default function AssetsPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-gray-800">{a.description}</span>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{a.assetType.replace(/_/g, ' ')}</span>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{ASSET_TYPE_LABELS[a.assetType] ?? a.assetType.replace(/_/g, ' ')}</span>
                 </div>
                 <div className="flex gap-4 mt-1 flex-wrap">
                   {a.institution && <span className="text-xs text-gray-500">{a.institution}</span>}
@@ -104,6 +132,7 @@ export default function AssetsPage() {
                 <div className="mt-1">
                   <span className="text-sm font-semibold text-green-600">{fmt(a.approxValue)}</span>
                   {a.valueAsOf && <span className="text-xs text-gray-400 ml-2">as of {a.valueAsOf}</span>}
+                  {a.maturityDate && <span className="text-xs text-amber-600 ml-2">matures {a.maturityDate}</span>}
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
@@ -119,8 +148,13 @@ export default function AssetsPage() {
         <Modal title={editing ? 'Edit Asset' : 'Add Asset'} onClose={() => setShowModal(false)}>
           <div className="space-y-4">
             <FormField label="Asset Type" required>
-              <select className={selectCls} value={form.assetType} onChange={e => setForm(f => ({ ...f, assetType: e.target.value as AssetType }))}>
-                {ASSET_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
+              <select className={selectCls} value={form.assetType} onChange={e => setForm(f => ({ ...f, assetType: e.target.value as AssetType, maturityDate: undefined }))}>
+                <option value="">— Select type —</option>
+                {ASSET_TYPE_GROUPS.map(g => (
+                  <optgroup key={g.label} label={g.label}>
+                    {g.types.map(t => <option key={t} value={t}>{ASSET_TYPE_LABELS[t]}</option>)}
+                  </optgroup>
+                ))}
               </select>
             </FormField>
             <FormField label="Description" required>
@@ -154,8 +188,13 @@ export default function AssetsPage() {
             <FormField label="Value As Of">
               <input className={inputCls} type="date" value={form.valueAsOf ?? ''} onChange={e => set('valueAsOf', e.target.value)} />
             </FormField>
-            <FormField label="Document Location">
-              <input className={inputCls} value={form.documentLocation ?? ''} onChange={e => set('documentLocation', e.target.value)} placeholder="Where is the document stored?" />
+            {MATURITY_TYPES.includes(form.assetType) && (
+              <FormField label="Maturity Date">
+                <input className={inputCls} type="date" value={form.maturityDate ?? ''} onChange={e => set('maturityDate', e.target.value)} />
+              </FormField>
+            )}
+            <FormField label="Location of original documents">
+              <input className={inputCls} value={form.documentLocation ?? ''} onChange={e => set('documentLocation', e.target.value)} placeholder="e.g. Bank safe, home locker, digital in Bitwarden" />
             </FormField>
             <FormField label="Remarks">
               <textarea className={inputCls} rows={2} value={form.remarks ?? ''} onChange={e => set('remarks', e.target.value)} placeholder="Any additional notes…" />

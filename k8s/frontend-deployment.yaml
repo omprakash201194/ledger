@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: ledger-frontend
-          image: localhost:30500/homelab/ledger-frontend:1.1.0
+          image: localhost:30500/homelab/ledger-frontend:1.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 80

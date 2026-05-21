@@ -55,6 +55,9 @@ public class Asset {
     @Column(name = "value_as_of")
     private LocalDate valueAsOf;
 
+    @Column(name = "maturity_date")
+    private LocalDate maturityDate;
+
     @Column(name = "document_location", length = 500)
     private String documentLocation;
 

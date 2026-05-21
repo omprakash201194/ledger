@@ -20,6 +20,7 @@ public class AssetRequest {
     private UUID trustedPersonId;
     private BigDecimal approxValue;
     private LocalDate valueAsOf;
+    private LocalDate maturityDate;
     private String documentLocation;
     private String remarks;
 }

@@ -15,5 +15,6 @@
     <include file="db/changelog/changes/008-create-will-records.sql"/>
     <include file="db/changelog/changes/009-create-alerts.sql"/>
     <include file="db/changelog/changes/010-create-password-reset-tokens.sql"/>
+    <include file="db/changelog/changes/011-add-asset-maturity-date.sql"/>
 
 </databaseChangeLog>

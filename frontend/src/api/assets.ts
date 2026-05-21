@@ -1,8 +1,12 @@
 import client from './client'
 
 export type AssetType =
-  | 'SAVINGS_ACCOUNT' | 'FIXED_DEPOSIT' | 'PPF' | 'EPF'
-  | 'MUTUAL_FUND' | 'EQUITY' | 'GOLD' | 'REAL_ESTATE' | 'VEHICLE' | 'OTHER'
+  | 'SAVINGS_ACCOUNT' | 'CURRENT_ACCOUNT'
+  | 'FIXED_DEPOSIT' | 'RECURRING_DEPOSIT'
+  | 'PPF' | 'EPF' | 'NPS'
+  | 'MUTUAL_FUND' | 'EQUITY'
+  | 'GOLD' | 'REAL_ESTATE' | 'VEHICLE' | 'BANK_LOCKER'
+  | 'OTHER'
 
 export type HoldingMode = 'SINGLE' | 'JOINT' | 'EITHER_OR_SURVIVOR'
 
@@ -18,6 +22,7 @@ export interface Asset {
   trustedPersonName?: string
   approxValue?: number
   valueAsOf?: string
+  maturityDate?: string
   documentLocation?: string
   remarks?: string
   createdAt: string

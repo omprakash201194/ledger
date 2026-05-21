@@ -355,6 +355,28 @@ Three OAuth2 fixes required during deployment:
 - 4 new alert types: WILL_NO_REVIEW, NOMINEE_MISSING, FD_MATURITY_DUE, EMI_ENDING_SOON
 - AlertsPage: color-coded badges for all 9 alert types
 
+### v1.3.0 — UI/UX improvements ✅ DONE (commit `ef5e52f`, issue #9)
+All 19 improvements from the plan implemented:
+- **A1** Toast notifications on all save/delete actions (shared Toast + toastStore)
+- **A2** Inline field hints on domain-specific fields (FormField hint prop)
+- **A3** Alert count badge on sidebar Alerts item and BottomNav More button
+- **A4** NOMINEE_MISSING contextual amber banner on Assets page
+- **A5** SkeletonCard loading states on all list pages
+- **B1** BottomNav "More" drawer (Recurring, Trusted Persons, Digital Accounts, Will)
+- **B2** Live section counts on Dashboard section cards
+- **C1** Progressive disclosure on Assets form (4 primary + More toggle)
+- **C2** Progressive disclosure on Insurance form (5 primary + More toggle)
+- **D1** Onboarding checklist on Dashboard for new users
+- **D2** Net worth stacked bar (green/red proportional)
+- **E1** Assets grouped by category with per-group subtotals
+- **E2** Sort chips (Value/Name/Recent) + filter chips on Assets page
+- **E3** Will page status summary card when Will is recorded
+- **E4** "Updated X ago" relative timestamps on all list cards
+- **F1** "Discard changes?" confirm modal on Assets, Insurance, Liabilities
+- **F2** Enter key to submit on Recurring (payee/amount) and TrustedPersons (name/phone)
+- **F3** Empty-state CTA buttons on all list pages
+- Shared `timeAgo` utility extracted to `src/utils/timeAgo.ts`
+
 ## What is explicitly out of scope
 
 - Credential vault (encrypted password storage)

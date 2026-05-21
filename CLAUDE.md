@@ -15,13 +15,14 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**v1.2.0 live — all 6 phases + password reset + TODO improvements complete.**
+**v1.3.0 live — full UI/UX overhaul complete.**
 
 - Internal: `https://ledger.homelab.local`
 - Public: `https://ledger.onelifestack.com` (Cloudflare Tunnel)
 - Auth: email/password + Google OAuth2 + forgot-password email flow, all working
-- CI/CD: GitHub Actions deploys on every push to `main` via self-hosted runner
-- Images: `ledger-backend:1.2.0`, `ledger-frontend:1.2.0`
+- CI/CD: GitHub Actions deploys on every push to `main` (uses `github.sha` image tags)
+- v1.2.0: New asset types (NPS/BANK_LOCKER), maturity date field, 4 new alert types
+- v1.3.0: Toast notifications, skeleton loading, progressive disclosure forms, dashboard improvements, BottomNav More drawer, asset grouping/sort/filter, relative timestamps, empty-state CTAs, discard-changes confirm, Enter-to-submit
 
 **v1.2.0 additions (commit `f972f88`):**
 - Asset types: CURRENT_ACCOUNT, RECURRING_DEPOSIT, NPS, BANK_LOCKER added

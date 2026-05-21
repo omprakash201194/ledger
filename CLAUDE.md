@@ -15,13 +15,21 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**All 6 phases complete + password reset added. App is live.**
+**v1.2.0 live — all 6 phases + password reset + TODO improvements complete.**
 
 - Internal: `https://ledger.homelab.local`
 - Public: `https://ledger.onelifestack.com` (Cloudflare Tunnel)
 - Auth: email/password + Google OAuth2 + forgot-password email flow, all working
 - CI/CD: GitHub Actions deploys on every push to `main` via self-hosted runner
-- Images: `ledger-backend:1.1.0`, `ledger-frontend:1.1.0`
+- Images: `ledger-backend:1.2.0`, `ledger-frontend:1.2.0`
+
+**v1.2.0 additions (commit `f972f88`):**
+- Asset types: CURRENT_ACCOUNT, RECURRING_DEPOSIT, NPS, BANK_LOCKER added
+- Asset dropdown grouped into categories with human-friendly labels
+- `maturity_date` field on Asset entity (Liquibase migration 011); shown in form for FD/RD/NPS
+- "Document Location" label renamed to "Location of original documents" across Assets + Insurance
+- Will page shows "Why a Will matters" CTA card when `hasWill=false`
+- 4 new nightly alert types: WILL_NO_REVIEW, NOMINEE_MISSING, FD_MATURITY_DUE, EMI_ENDING_SOON
 
 **OAuth2 gotchas learned during deployment** (already fixed in code):
 - Google rejects `.local` TLDs — use the public domain for OAuth2 credentials

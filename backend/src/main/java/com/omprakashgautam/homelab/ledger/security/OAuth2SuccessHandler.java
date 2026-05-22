@@ -2,6 +2,7 @@ package com.omprakashgautam.homelab.ledger.security;
 
 import com.omprakashgautam.homelab.ledger.model.User;
 import com.omprakashgautam.homelab.ledger.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +28,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     @Value("${app.oauth2.frontend-redirect-url}")
     private String frontendRedirectUrl;
+
+    @Value("${app.oauth2.mobile-redirect-url}")
+    private String mobileRedirectUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -39,11 +44,27 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtTokenProvider.generateTokenForUser(user);
         log.info("OAuth2 login successful for user: {}", email);
 
-        String redirectUrl = frontendRedirectUrl
+        // reason: mobile app sets a short-lived cookie on the OAuth2 initiation request
+        // so we can redirect to the app deep link instead of the web frontend
+        boolean isMobile = isMobileRequest(request, response);
+
+        String baseRedirect = isMobile ? mobileRedirectUrl : frontendRedirectUrl;
+        String redirectUrl = baseRedirect
                 + "?token=" + token
                 + "&userId=" + user.getId()
                 + "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
                 + "&name=" + URLEncoder.encode(user.getName() != null ? user.getName() : "", StandardCharsets.UTF_8);
+
+        log.info("Redirecting OAuth2 success to {} destination", isMobile ? "mobile" : "web");
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+    }
+
+    private boolean isMobileRequest(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return false;
+
+        return Arrays.stream(cookies)
+                .filter(c -> MobileOAuth2DetectionFilter.MOBILE_COOKIE_NAME.equals(c.getName()))
+                .anyMatch(c -> "true".equals(c.getValue()));
     }
 }

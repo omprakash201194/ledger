@@ -1,6 +1,7 @@
 package com.omprakashgautam.homelab.ledger.config;
 
 import com.omprakashgautam.homelab.ledger.security.JwtAuthenticationFilter;
+import com.omprakashgautam.homelab.ledger.security.MobileOAuth2DetectionFilter;
 import com.omprakashgautam.homelab.ledger.security.OAuth2SuccessHandler;
 import com.omprakashgautam.homelab.ledger.security.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(new MobileOAuth2DetectionFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(ae -> ae.baseUri("/api/oauth2/authorization"))

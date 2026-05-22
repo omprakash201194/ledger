@@ -383,3 +383,20 @@ All 19 improvements from the plan implemented:
 - PDF / Excel export
 - Dead-man's switch / inactivity trigger
 - Multi-household / shared access for trusted persons (post-MVP — trusted persons are records only, not app users)
+
+### v1.4.0 — Mobile app dark theme redesign + section intro notes ✅ DONE (commit `dea647e`)
+- **Design system:** `mobile/src/theme.ts` — dark theme tokens (bg `#0C1119`, gold `#C9A96E`, full palette)
+- **TypeBadge component:** category-colored pill badge using CC color map
+- **CardWrap component:** pressable card with press scale animation (0.985) 
+- **Dashboard:** net worth hero card with gold value, animated count-up, 2-col modules grid, alert banner
+- **Assets:** grouped by category, TypeBadge, filter chips, nominee warning
+- **Insurance:** TypeBadge, urgency-colored maturity date (red if ≤30 days), premium footer
+- **Alerts:** grouped by urgency (high/medium/low), colored cards
+- **More drawer:** dark sheet, colored icon squares for all sections
+- **Liabilities:** outstanding in red, EMI/end-date footer
+- **Trusted Persons:** CC-colored avatar with initials
+- **Digital Accounts:** key icon squares, info banner
+- **Will:** gold status card, detail rows, review reminder box
+- **Recurring:** colored icon squares, amount with frequency suffix
+- **Section intro notes:** added to all 9 sections on both webapp and mobile with final copy
+- **Google OAuth2 fix:** `MobileOAuth2DetectionFilter` registered before `OAuth2AuthorizationRequestRedirectFilter`, `SameSite=None; Secure` cookie, `openAuthSessionAsync` on mobile

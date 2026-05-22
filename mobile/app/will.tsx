@@ -168,7 +168,7 @@ export default function WillScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           keyboardShouldPersistTaps="handled"
         >
-          <SectionIntro note="A Will tells your family exactly how to distribute your estate. Without one, they may face months of legal uncertainty. Record where the original document is stored and who the executor is — even a simple registered Will makes an enormous difference." />
+          <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. This section does not replace a Will — it locates one. If you don't yet have a Will, this section can also act as a reminder to make one. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
 
           {/* Status info */}
           {will && (

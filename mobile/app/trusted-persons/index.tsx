@@ -84,7 +84,7 @@ export default function TrustedPersonsScreen() {
         onHide={hideToast}
       />
 
-      <SectionIntro note="People your family must contact in an emergency — a spouse, financial advisor, lawyer, or executor. These are the people who should know this register exists and how to use it." />
+      <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first. Add notes where useful — for example, 'spouse handles all banking' or 'CA holds Income Tax portal access.'" />
 
       {loading ? (
         <LoadingState message="Loading..." />

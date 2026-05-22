@@ -119,7 +119,7 @@ export default function AssetsScreen() {
       </View>
 
       <View className="flex-1 -mt-4">
-        <SectionIntro note="Track every financial and physical asset your household owns — bank accounts, fixed deposits, investments, property, and gold. Assign a trusted person to each so your family knows who to contact." />
+        <SectionIntro note="Everything you own that has financial value — bank accounts, deposits, mutual funds, demat holdings, property, gold, vehicles. If something can be inherited or claimed, it belongs here. Tip: include even small accounts. Forgotten accounts are the single biggest source of family stress later." />
 
         {/* Sort chips */}
         <View className="flex-row gap-2 px-4 py-3">

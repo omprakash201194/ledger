@@ -115,7 +115,7 @@ export default function InsurancePage() {
         </button>
       </div>
 
-      <SectionIntro note="Document all active policies — life, health, vehicle, and property. Include the policy number and beneficiary so your family can file a claim quickly without searching through physical papers." />
+      <SectionIntro note="Life, health, accident and general insurance policies. Insurance is usually the first thing a family must claim — they cannot claim what they do not know exists. Include the policy document location; finding the original is often the hardest part." />
 
       {loading ? (
         <SkeletonCard rows={3} />

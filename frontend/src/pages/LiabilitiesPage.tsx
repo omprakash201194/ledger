@@ -103,7 +103,7 @@ export default function LiabilitiesPage() {
         </button>
       </div>
 
-      <SectionIntro note="Record all outstanding loans and debts — home loans, car loans, personal loans, and credit cards. Your family needs to know which payments must continue and which need to be settled." />
+      <SectionIntro note="All outstanding loans and dues — home loan, car loan, personal loan, credit card balances, money you've borrowed from family. Recording these protects your family from surprise demands and helps them claim any loan-protection insurance that may apply." />
 
       {loading ? (
         <SkeletonCard rows={3} />

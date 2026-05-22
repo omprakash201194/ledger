@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import SectionIntro from '../components/SectionIntro'
 import { getNetWorth, type NetWorthSummary } from '../api/dashboard'
 import { getAssets } from '../api/assets'
 import { getLiabilities } from '../api/liabilities'
@@ -88,7 +89,8 @@ export default function DashboardPage() {
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <h1 className="text-xl font-bold text-gray-800 mb-1">Welcome, {name}</h1>
-      <p className="text-sm text-gray-500 mb-6">Your financial legacy at a glance.</p>
+      <p className="text-sm text-gray-500 mb-4">Your financial legacy at a glance.</p>
+      <SectionIntro note="Your financial life at a glance. The numbers here are a summary of what you've recorded across each section. Update each section periodically — the more current it is, the more useful it becomes for you today and for your family if you cannot act yourself." />
 
       {/* Stats */}
       {loading ? (

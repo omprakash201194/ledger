@@ -19,6 +19,7 @@ import { useAlertStore } from "@/store/alertStore";
 import { Card } from "@/components/Card";
 import { LoadingState } from "@/components/LoadingState";
 import { formatCurrency } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 interface SectionCount {
   assets: number;
@@ -300,6 +301,8 @@ export default function DashboardScreen() {
                   <Ionicons name="chevron-forward" size={16} color="#D97706" />
                 </TouchableOpacity>
               )}
+
+              <SectionIntro note="Your financial life at a glance. The numbers here are a summary of what you've recorded across each section. Update each section periodically — the more current it is, the more useful it becomes for you today and for your family if you cannot act yourself." />
 
               {/* Onboarding checklist */}
               {!allDone && (

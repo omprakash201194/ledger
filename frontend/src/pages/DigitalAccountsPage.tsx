@@ -96,7 +96,7 @@ export default function DigitalAccountsPage() {
         </button>
       </div>
 
-      <SectionIntro note="Record where your important online accounts are and where their credentials are stored. Never enter passwords here — just their location (e.g. 'Saved in Bitwarden vault') so your family can access them if needed." />
+      <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Important: do not type passwords directly here. Note where the password is kept (e.g. 'in Bitwarden vault' or 'sealed envelope with spouse'). This protects you while keeping access possible." />
 
       {loading ? (
         <SkeletonCard rows={3} />

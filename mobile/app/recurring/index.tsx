@@ -108,7 +108,7 @@ export default function RecurringScreen() {
         </View>
       )}
 
-      <SectionIntro note="Auto-debits and standing instructions that run every month — loan EMIs, SIPs, insurance premiums, and subscriptions. Your family needs to know which ones to keep running, cancel, or review." />
+      <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account whether or not you act on it. Mark each one as Continue / Cancel / Transfer so your family knows what to stop and what to keep running." />
 
       {loading ? (
         <LoadingState message="Loading obligations..." />

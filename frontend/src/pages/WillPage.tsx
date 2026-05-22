@@ -70,7 +70,7 @@ export default function WillPage() {
         <p className="text-sm text-gray-500 mt-0.5">Document where your Will is stored and who your executor is.</p>
       </div>
 
-      <SectionIntro note="A Will tells your family exactly how to distribute your estate. Without one, they may face months of legal uncertainty. Record where the original document is stored and who the executor is — even a simple registered Will makes an enormous difference." />
+      <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. This section does not replace a Will — it locates one. If you don't yet have a Will, this section can also act as a reminder to make one. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
 
       {/* E3: Status summary card — show when will is recorded */}
       {willRecord?.hasWill && (

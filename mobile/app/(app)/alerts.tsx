@@ -178,7 +178,7 @@ export default function AlertsScreen() {
         )}
       </View>
 
-      <SectionIntro note="Automated reminders generated nightly — upcoming insurance premiums, loan maturities, stale asset values, and missing nominees. Address these regularly to keep your register accurate and complete." />
+      <SectionIntro note="Automatic reminders generated when something needs your attention — premiums coming due, nominations missing, Will reviews pending, EMIs ending. Acting on alerts keeps the rest of your information accurate and current." />
 
       {loading ? (
         <LoadingState message="Loading alerts..." />

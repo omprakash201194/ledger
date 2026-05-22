@@ -61,7 +61,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private boolean isMobileRequest(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) return false;
+        if (cookies == null) {
+            log.info("OAuth2SuccessHandler: no cookies present on callback request");
+            return false;
+        }
+
+        log.info("OAuth2SuccessHandler: cookies present = {}",
+                Arrays.stream(cookies).map(Cookie::getName).toList());
 
         return Arrays.stream(cookies)
                 .filter(c -> MobileOAuth2DetectionFilter.MOBILE_COOKIE_NAME.equals(c.getName()))

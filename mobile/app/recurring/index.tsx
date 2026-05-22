@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,21 +6,34 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import {
   RecurringObligation,
   recurringApi,
   OBLIGATION_TYPE_LABELS,
   FREQUENCY_LABELS,
-} from "@/api/recurring";
-import { LoadingState } from "@/components/LoadingState";
-import { EmptyState } from "@/components/EmptyState";
-import { Toast, useToast } from "@/components/Toast";
-import { timeAgo, formatCurrency } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
+} from '@/api/recurring';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyState } from '@/components/EmptyState';
+import { Toast, useToast } from '@/components/Toast';
+import { CardWrap } from '@/components/CardWrap';
+import { SectionIntro } from '@/components/SectionIntro';
+import { formatCurrency } from '@/utils/timeAgo';
+import { T, fmtINR } from '@/theme';
+
+const OBL_COLORS: Record<string, string> = {
+  EMI: T.redL,
+  SIP: T.greenL,
+  INSURANCE_PREMIUM: T.brandL,
+  SUBSCRIPTION: T.amberL,
+  RENT: T.gold,
+  UTILITY: T.txS,
+  OTHER: T.txS,
+};
 
 export default function RecurringScreen() {
   const router = useRouter();
@@ -35,7 +48,7 @@ export default function RecurringScreen() {
       const data = await recurringApi.getAll();
       setObligations(data);
     } catch {
-      showToast("Failed to load obligations", "error");
+      showToast('Failed to load obligations', 'error');
     }
   }, []);
 
@@ -52,22 +65,20 @@ export default function RecurringScreen() {
 
   const handleDelete = (obligation: RecurringObligation) => {
     Alert.alert(
-      "Delete obligation",
+      'Delete obligation',
       `Delete "${obligation.payee}"?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               await recurringApi.delete(obligation.id);
-              setObligations((prev) =>
-                prev.filter((o) => o.id !== obligation.id)
-              );
-              showToast("Obligation deleted", "success");
+              setObligations((prev) => prev.filter((o) => o.id !== obligation.id));
+              showToast('Obligation deleted', 'success');
             } catch {
-              showToast("Failed to delete", "error");
+              showToast('Failed to delete', 'error');
             }
           },
         },
@@ -78,154 +89,164 @@ export default function RecurringScreen() {
   const monthlyTotal = obligations.reduce((sum, o) => {
     const freq = o.frequency;
     const monthly =
-      freq === "MONTHLY"
+      freq === 'MONTHLY'
         ? o.amount
-        : freq === "QUARTERLY"
+        : freq === 'QUARTERLY'
         ? o.amount / 3
-        : freq === "HALF_YEARLY"
+        : freq === 'HALF_YEARLY'
         ? o.amount / 6
         : o.amount / 12;
     return sum + monthly;
   }, 0);
 
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
+  const freqSuffix = (freq: string) => {
+    if (freq === 'MONTHLY') return '/mo';
+    if (freq === 'QUARTERLY') return '/qtr';
+    if (freq === 'HALF_YEARLY') return '/6mo';
+    return '/yr';
+  };
 
+  return (
+    <SafeAreaView style={styles.root} edges={['bottom']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
+
+      {/* Monthly outflow header */}
       {!loading && obligations.length > 0 && (
-        <View className="bg-amber-50 border-b border-amber-100 px-4 py-3">
-          <Text className="text-xs text-amber-500 font-semibold">
-            Estimated monthly outflow
-          </Text>
-          <Text className="text-xl font-bold text-amber-700">
-            {formatCurrency(Math.round(monthlyTotal))}
-          </Text>
+        <View style={styles.headerBanner}>
+          <Text style={styles.bannerLabel}>ESTIMATED MONTHLY OUTFLOW</Text>
+          <Text style={styles.bannerValue}>{fmtINR(Math.round(monthlyTotal))}</Text>
         </View>
       )}
-
-      <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account whether or not you act on it. Mark each one as Continue / Cancel / Transfer so your family knows what to stop and what to keep running." />
 
       {loading ? (
         <LoadingState message="Loading obligations..." />
       ) : obligations.length === 0 ? (
-        <EmptyState
-          icon="repeat-outline"
-          title="No recurring obligations"
-          subtitle="Track your EMIs, SIPs, subscriptions, and other regular payments."
-          ctaLabel="Add obligation"
-          onCta={() => router.push("/recurring/form")}
-        />
+        <>
+          <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account." />
+          <EmptyState
+            icon="repeat-outline"
+            title="No recurring obligations"
+            subtitle="Track your EMIs, SIPs, subscriptions, and other regular payments."
+            ctaLabel="Add obligation"
+            onCta={() => router.push('/recurring/form')}
+          />
+        </>
       ) : (
         <FlatList
           data={obligations}
           keyExtractor={(item) => item.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#D97706"
-            />
+          ListHeaderComponent={
+            <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account whether or not you act on it." />
           }
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 12,
-            paddingBottom: 80,
-          }}
-          renderItem={({ item: obligation }) => (
-            <TouchableOpacity
-              onPress={() => router.push(`/recurring/form?id=${obligation.id}`)}
-              className="bg-white rounded-xl mb-3 p-4"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.06,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <View className="flex-row items-start gap-3">
-                <View className="bg-amber-50 rounded-lg p-2.5">
-                  <Ionicons name="repeat-outline" size={20} color="#D97706" />
-                </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center justify-between mb-0.5">
-                    <Text className="text-sm font-bold text-gray-900">
-                      {obligation.payee}
-                    </Text>
-                    <View className="flex-row gap-1">
-                      <TouchableOpacity
-                        onPress={() =>
-                          router.push(`/recurring/form?id=${obligation.id}`)
-                        }
-                        className="p-1"
-                      >
-                        <Ionicons name="pencil-outline" size={14} color="#6B7280" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(obligation)}
-                        className="p-1"
-                      >
-                        <Ionicons name="trash-outline" size={14} color="#EF4444" />
-                      </TouchableOpacity>
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.amber} />
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
+          renderItem={({ item: obligation }) => {
+            const color = OBL_COLORS[obligation.obligationType] ?? T.txS;
+            return (
+              <CardWrap
+                onPress={() => router.push(`/recurring/form?id=${obligation.id}`)}
+                style={styles.card}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.cardRow}>
+                    {/* Icon square */}
+                    <View style={[styles.iconSquare, { backgroundColor: color + '22' }]}>
+                      <Ionicons name="repeat-outline" size={18} color={color} />
                     </View>
-                  </View>
-                  <View className="flex-row gap-2 mb-1.5">
-                    <View className="bg-amber-100 rounded-full px-2 py-0.5">
-                      <Text className="text-amber-700 text-[10px] font-semibold">
+                    <View style={styles.info}>
+                      <Text style={styles.payee}>{obligation.payee}</Text>
+                      <Text style={styles.typeLine}>
                         {OBLIGATION_TYPE_LABELS[obligation.obligationType]}
-                      </Text>
-                    </View>
-                    <View className="bg-gray-100 rounded-full px-2 py-0.5">
-                      <Text className="text-gray-600 text-[10px] font-semibold">
+                        {' · '}
                         {FREQUENCY_LABELS[obligation.frequency]}
                       </Text>
                     </View>
+                    <View style={styles.amountCol}>
+                      <Text style={styles.amount}>{fmtINR(obligation.amount)}</Text>
+                      <Text style={styles.amountSuffix}>{freqSuffix(obligation.frequency)}</Text>
+                    </View>
                   </View>
-                  <Text className="text-base font-bold text-gray-900">
-                    {formatCurrency(obligation.amount)}
-                    <Text className="text-xs font-normal text-gray-400">
-                      {" "}
-                      / {obligation.frequency.toLowerCase()}
-                    </Text>
-                  </Text>
-                  {obligation.paymentSource && (
-                    <Text className="text-xs text-gray-500 mt-0.5">
-                      Paid from: {obligation.paymentSource}
-                    </Text>
-                  )}
-                  {obligation.dueDay && (
-                    <Text className="text-xs text-gray-500">
-                      Due on: {obligation.dueDay}th of month
-                    </Text>
-                  )}
-                  <Text className="text-xs text-gray-400 mt-1.5">
-                    Updated {timeAgo(obligation.updatedAt)}
-                  </Text>
                 </View>
-              </View>
-            </TouchableOpacity>
-          )}
+
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    onPress={() => router.push(`/recurring/form?id=${obligation.id}`)}
+                    style={styles.actionBtn}
+                  >
+                    <Ionicons name="pencil-outline" size={13} color={T.txM} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(obligation)} style={styles.actionBtn}>
+                    <Ionicons name="trash-outline" size={13} color={T.redL} />
+                  </TouchableOpacity>
+                </View>
+              </CardWrap>
+            );
+          }}
         />
       )}
 
       <TouchableOpacity
-        onPress={() => router.push("/recurring/form")}
-        className="absolute bottom-6 right-5 bg-amber-500 rounded-2xl w-14 h-14 items-center justify-center"
-        style={{
-          shadowColor: "#D97706",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 8,
-          elevation: 6,
-        }}
+        onPress={() => router.push('/recurring/form')}
+        style={styles.fab}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  headerBanner: {
+    backgroundColor: T.surf,
+    borderBottomWidth: 1,
+    borderBottomColor: T.bdrF,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  bannerLabel: { fontSize: 10, color: T.txM, fontWeight: '600', letterSpacing: 0.8 },
+  bannerValue: { fontSize: 20, fontWeight: '700', color: T.amberL },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  iconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  info: { flex: 1 },
+  payee: { fontSize: 14, fontWeight: '600', color: T.tx, marginBottom: 3 },
+  typeLine: { fontSize: 11, color: T.txM },
+  amountCol: { alignItems: 'flex-end' },
+  amount: { fontSize: 15, fontWeight: '700', color: T.tx },
+  amountSuffix: { fontSize: 11, color: T.txM },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    gap: 4,
+  },
+  actionBtn: { padding: 5 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: T.amber,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: T.amber,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+});

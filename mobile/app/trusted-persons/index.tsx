@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,26 +7,24 @@ import {
   RefreshControl,
   Alert,
   Linking,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import {
   TrustedPerson,
   trustedPersonsApi,
   TRUSTED_PERSON_TYPE_LABELS,
-} from "@/api/trustedPersons";
-import { LoadingState } from "@/components/LoadingState";
-import { EmptyState } from "@/components/EmptyState";
-import { Toast, useToast } from "@/components/Toast";
-import { timeAgo } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
-
-const TYPE_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
-  FAMILY: { bg: "bg-teal-50", text: "text-teal-600", badge: "bg-teal-100" },
-  ADVISOR: { bg: "bg-blue-50", text: "text-blue-600", badge: "bg-blue-100" },
-  EXECUTOR: { bg: "bg-purple-50", text: "text-purple-600", badge: "bg-purple-100" },
-};
+} from '@/api/trustedPersons';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyState } from '@/components/EmptyState';
+import { Toast, useToast } from '@/components/Toast';
+import { TypeBadge } from '@/components/TypeBadge';
+import { CardWrap } from '@/components/CardWrap';
+import { SectionIntro } from '@/components/SectionIntro';
+import { timeAgo } from '@/utils/timeAgo';
+import { T, CC } from '@/theme';
 
 export default function TrustedPersonsScreen() {
   const router = useRouter();
@@ -41,7 +39,7 @@ export default function TrustedPersonsScreen() {
       const data = await trustedPersonsApi.getAll();
       setPersons(data);
     } catch {
-      showToast("Failed to load trusted persons", "error");
+      showToast('Failed to load trusted persons', 'error');
     }
   }, []);
 
@@ -57,18 +55,18 @@ export default function TrustedPersonsScreen() {
   }, []);
 
   const handleDelete = (person: TrustedPerson) => {
-    Alert.alert("Remove person", `Remove "${person.name}" from trusted persons?`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert('Remove person', `Remove "${person.name}" from trusted persons?`, [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: "Remove",
-        style: "destructive",
+        text: 'Remove',
+        style: 'destructive',
         onPress: async () => {
           try {
             await trustedPersonsApi.delete(person.id);
             setPersons((prev) => prev.filter((p) => p.id !== person.id));
-            showToast("Person removed", "success");
+            showToast('Person removed', 'success');
           } catch {
-            showToast("Failed to remove", "error");
+            showToast('Failed to remove', 'error');
           }
         },
       },
@@ -76,148 +74,146 @@ export default function TrustedPersonsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
-
-      <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first. Add notes where useful — for example, 'spouse handles all banking' or 'CA holds Income Tax portal access.'" />
+    <SafeAreaView style={styles.root} edges={['bottom']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {loading ? (
         <LoadingState message="Loading..." />
       ) : persons.length === 0 ? (
-        <EmptyState
-          icon="people-outline"
-          title="No trusted persons"
-          subtitle="Add family members, advisors, and executors who should know about your finances."
-          ctaLabel="Add person"
-          onCta={() => router.push("/trusted-persons/form")}
-        />
+        <>
+          <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
+          <EmptyState
+            icon="people-outline"
+            title="No trusted persons"
+            subtitle="Add family members, advisors, and executors who should know about your finances."
+            ctaLabel="Add person"
+            onCta={() => router.push('/trusted-persons/form')}
+          />
+        </>
       ) : (
         <FlatList
           data={persons}
           keyExtractor={(item) => item.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#0D9488"
-            />
+          ListHeaderComponent={
+            <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
           }
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 12,
-            paddingBottom: 80,
-          }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.green} />
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
           renderItem={({ item: person }) => {
-            const colors = TYPE_COLORS[person.type] ?? TYPE_COLORS.FAMILY;
+            const colors = CC[person.type] ?? CC.FAMILY;
+            const initials = person.name.slice(0, 2).toUpperCase();
             return (
-              <TouchableOpacity
+              <CardWrap
                 onPress={() => router.push(`/trusted-persons/form?id=${person.id}`)}
-                className="bg-white rounded-xl mb-3 p-4"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
+                style={styles.card}
               >
-                <View className="flex-row items-start gap-3">
-                  <View className={`${colors.bg} rounded-full w-11 h-11 items-center justify-center`}>
-                    <Text className={`${colors.text} text-lg font-bold`}>
-                      {person.name[0]?.toUpperCase()}
-                    </Text>
-                  </View>
-                  <View className="flex-1">
-                    <View className="flex-row items-center justify-between mb-0.5">
-                      <Text className="text-sm font-bold text-gray-900">
-                        {person.name}
-                      </Text>
-                      <View className="flex-row gap-1">
-                        <TouchableOpacity
-                          onPress={() =>
-                            router.push(`/trusted-persons/form?id=${person.id}`)
-                          }
-                          className="p-1"
-                        >
-                          <Ionicons name="pencil-outline" size={14} color="#6B7280" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleDelete(person)}
-                          className="p-1"
-                        >
-                          <Ionicons name="trash-outline" size={14} color="#EF4444" />
-                        </TouchableOpacity>
-                      </View>
+                <View style={styles.cardContent}>
+                  <View style={styles.cardRow}>
+                    {/* Avatar */}
+                    <View style={[styles.avatar, { backgroundColor: colors.bg }]}>
+                      <Text style={[styles.avatarText, { color: colors.tx }]}>{initials}</Text>
                     </View>
-
-                    <View className="flex-row gap-2 mb-1.5">
-                      <View className={`${colors.badge} rounded-full px-2 py-0.5`}>
-                        <Text className={`${colors.text} text-[10px] font-semibold`}>
-                          {TRUSTED_PERSON_TYPE_LABELS[person.type]}
-                        </Text>
+                    <View style={styles.info}>
+                      <View style={styles.nameRow}>
+                        <Text style={styles.name}>{person.name}</Text>
+                        <TypeBadge code={person.type} label={TRUSTED_PERSON_TYPE_LABELS[person.type]} />
                       </View>
                       {person.relationship && (
-                        <Text className="text-[10px] text-gray-500 self-center">
-                          {person.relationship}
-                        </Text>
+                        <Text style={styles.relationship}>{person.relationship}</Text>
                       )}
+                      <View style={styles.contactRow}>
+                        {person.phone && (
+                          <TouchableOpacity
+                            onPress={() => Linking.openURL(`tel:${person.phone}`)}
+                            style={styles.contactItem}
+                          >
+                            <Ionicons name="call-outline" size={12} color={T.green} />
+                            <Text style={[styles.contactText, { color: T.greenL }]}>{person.phone}</Text>
+                          </TouchableOpacity>
+                        )}
+                        {person.email && (
+                          <TouchableOpacity
+                            onPress={() => Linking.openURL(`mailto:${person.email}`)}
+                            style={styles.contactItem}
+                          >
+                            <Ionicons name="mail-outline" size={12} color={T.brandL} />
+                            <Text style={[styles.contactText, { color: T.brandL }]}>{person.email}</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
                     </View>
-
-                    <View className="flex-row gap-3">
-                      {person.phone && (
+                    <View style={styles.rightCol}>
+                      <Ionicons name="chevron-forward" size={16} color={T.txM} />
+                      <View style={styles.rowActions}>
                         <TouchableOpacity
-                          onPress={() => Linking.openURL(`tel:${person.phone}`)}
-                          className="flex-row items-center gap-1"
+                          onPress={() => router.push(`/trusted-persons/form?id=${person.id}`)}
+                          style={styles.actionBtn}
                         >
-                          <Ionicons name="call-outline" size={13} color="#0D9488" />
-                          <Text className="text-xs text-teal-600">{person.phone}</Text>
+                          <Ionicons name="pencil-outline" size={13} color={T.txM} />
                         </TouchableOpacity>
-                      )}
-                      {person.email && (
-                        <TouchableOpacity
-                          onPress={() => Linking.openURL(`mailto:${person.email}`)}
-                          className="flex-row items-center gap-1"
-                        >
-                          <Ionicons name="mail-outline" size={13} color="#4F46E5" />
-                          <Text className="text-xs text-indigo-600">{person.email}</Text>
+                        <TouchableOpacity onPress={() => handleDelete(person)} style={styles.actionBtn}>
+                          <Ionicons name="trash-outline" size={13} color={T.redL} />
                         </TouchableOpacity>
-                      )}
+                      </View>
                     </View>
-
-                    {person.notes && (
-                      <Text className="text-xs text-gray-500 mt-1">
-                        {person.notes}
-                      </Text>
-                    )}
-                    <Text className="text-xs text-gray-400 mt-1">
-                      Added {timeAgo(person.createdAt)}
-                    </Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+              </CardWrap>
             );
           }}
         />
       )}
 
       <TouchableOpacity
-        onPress={() => router.push("/trusted-persons/form")}
-        className="absolute bottom-6 right-5 bg-teal-600 rounded-2xl w-14 h-14 items-center justify-center"
-        style={{
-          shadowColor: "#0D9488",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 8,
-          elevation: 6,
-        }}
+        onPress={() => router.push('/trusted-persons/form')}
+        style={styles.fab}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  avatarText: { fontSize: 14, fontWeight: '700' },
+  info: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 },
+  name: { fontSize: 14, fontWeight: '700', color: T.tx },
+  relationship: { fontSize: 12, color: T.txS, marginBottom: 5 },
+  contactRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
+  contactItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  contactText: { fontSize: 12 },
+  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 48 },
+  rowActions: { flexDirection: 'row', gap: 2 },
+  actionBtn: { padding: 4 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: T.green,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: T.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+});

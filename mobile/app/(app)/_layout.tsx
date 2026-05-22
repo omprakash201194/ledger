@@ -1,27 +1,26 @@
-import React from "react";
-import { Tabs } from "expo-router";
-import { View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useAlertStore } from "@/store/alertStore";
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useAlertStore } from '@/store/alertStore';
+import { T } from '@/theme';
 
 function AlertBadge() {
   const unreadCount = useAlertStore((s) => s.unreadCount);
   if (unreadCount === 0) return null;
   return (
-    <View
-      className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[16px] h-4 items-center justify-center px-1"
-    >
-      <Text className="text-white text-[9px] font-bold">
-        {unreadCount > 99 ? "99+" : unreadCount}
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>
+        {unreadCount > 99 ? '99+' : unreadCount}
       </Text>
     </View>
   );
 }
 
-function BellIcon({ color, size }: { color: string; size: number }) {
+function MoreIcon({ color, size }: { color: string; size: number }) {
   return (
     <View>
-      <Ionicons name="notifications-outline" size={size} color={color} />
+      <Ionicons name="grid-outline" size={size} color={color} />
       <AlertBadge />
     </View>
   );
@@ -32,25 +31,26 @@ export default function AppLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4F46E5",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarActiveTintColor: T.brandL,
+        tabBarInactiveTintColor: T.txM,
         tabBarStyle: {
           borderTopWidth: 1,
-          borderTopColor: "#F3F4F6",
-          backgroundColor: "#FFFFFF",
-          paddingBottom: 4,
-          height: 58,
+          borderTopColor: T.bdrF,
+          backgroundColor: T.surf,
+          paddingBottom: 20,
+          height: 72,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: "500",
+          fontWeight: '500',
         },
+
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Dashboard",
+          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -59,7 +59,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="assets"
         options={{
-          title: "Assets",
+          title: 'Assets',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="wallet-outline" size={size} color={color} />
           ),
@@ -68,7 +68,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="insurance"
         options={{
-          title: "Insurance",
+          title: 'Insurance',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shield-checkmark-outline" size={size} color={color} />
           ),
@@ -77,21 +77,41 @@ export default function AppLayout() {
       <Tabs.Screen
         name="alerts"
         options={{
-          title: "Alerts",
+          title: 'Alerts',
           tabBarIcon: ({ color, size }) => (
-            <BellIcon color={color} size={size} />
+            <Ionicons name="notifications-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
-          title: "More",
+          title: 'More',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid-outline" size={size} color={color} />
+            <MoreIcon color={color} size={size} />
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -6,
+    backgroundColor: T.red,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+});

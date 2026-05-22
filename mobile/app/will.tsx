@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,32 +8,34 @@ import {
   Switch,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import {
   WillRecord,
   WillRecordInput,
   WillType,
   willApi,
   WILL_TYPE_LABELS,
-} from "@/api/will";
-import { trustedPersonsApi } from "@/api/trustedPersons";
-import { FormField } from "@/components/FormField";
-import { SelectField, SelectOption } from "@/components/SelectField";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import { Toast, useToast } from "@/components/Toast";
-import { LoadingState } from "@/components/LoadingState";
-import { formatDate, timeAgo } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
+} from '@/api/will';
+import { trustedPersonsApi } from '@/api/trustedPersons';
+import { FormField } from '@/components/FormField';
+import { SelectField, SelectOption } from '@/components/SelectField';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { Toast, useToast } from '@/components/Toast';
+import { LoadingState } from '@/components/LoadingState';
+import { SectionIntro } from '@/components/SectionIntro';
+import { formatDate, timeAgo } from '@/utils/timeAgo';
+import { T } from '@/theme';
 
 const WILL_TYPE_OPTIONS: SelectOption[] = (
-  ["SINGLE", "JOINT", "NONE"] as WillType[]
+  ['SINGLE', 'JOINT', 'NONE'] as WillType[]
 ).map((t) => ({ value: t, label: WILL_TYPE_LABELS[t] }));
 
 interface FormState {
   hasWill: boolean;
-  willType: WillType | "";
+  willType: WillType | '';
   location: string;
   executorId: string;
   registeredWith: string;
@@ -44,12 +46,12 @@ interface FormState {
 function willToForm(w: WillRecord): FormState {
   return {
     hasWill: w.hasWill,
-    willType: w.willType ?? "",
-    location: w.location ?? "",
-    executorId: w.executorId ?? "",
-    registeredWith: w.registeredWith ?? "",
-    reviewReminderDate: w.reviewReminderDate ?? "",
-    notes: w.notes ?? "",
+    willType: w.willType ?? '',
+    location: w.location ?? '',
+    executorId: w.executorId ?? '',
+    registeredWith: w.registeredWith ?? '',
+    reviewReminderDate: w.reviewReminderDate ?? '',
+    notes: w.notes ?? '',
   };
 }
 
@@ -59,12 +61,12 @@ export default function WillScreen() {
   const [will, setWill] = useState<WillRecord | null>(null);
   const [form, setForm] = useState<FormState>({
     hasWill: false,
-    willType: "",
-    location: "",
-    executorId: "",
-    registeredWith: "",
-    reviewReminderDate: "",
-    notes: "",
+    willType: '',
+    location: '',
+    executorId: '',
+    registeredWith: '',
+    reviewReminderDate: '',
+    notes: '',
   });
   const [original, setOriginal] = useState<FormState | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,7 +94,7 @@ export default function WillScreen() {
         setOriginal(form);
       }
     } catch {
-      showToast("Failed to load Will data", "error");
+      showToast('Failed to load Will data', 'error');
     } finally {
       setLoading(false);
     }
@@ -125,9 +127,9 @@ export default function WillScreen() {
       const f = willToForm(updated);
       setForm(f);
       setOriginal(f);
-      showToast("Will record saved", "success");
+      showToast('Will record saved', 'success');
     } catch (err: any) {
-      showToast(err?.response?.data?.message ?? "Failed to save", "error");
+      showToast(err?.response?.data?.message ?? 'Failed to save', 'error');
     } finally {
       setSaving(false);
     }
@@ -135,232 +137,181 @@ export default function WillScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView style={styles.root}>
         <LoadingState message="Loading Will record..." />
       </SafeAreaView>
     );
   }
 
+  // Should we show review reminder box?
+  const reviewOverdue = will?.reviewReminderDate
+    ? new Date(will.reviewReminderDate) < new Date()
+    : false;
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
+    <SafeAreaView style={styles.root} edges={['bottom']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
       <ConfirmModal
         visible={showDiscard}
-        onConfirm={() => {
-          setShowDiscard(false);
-          if (original) setForm(original);
-        }}
+        onConfirm={() => { setShowDiscard(false); if (original) setForm(original); }}
         onCancel={() => setShowDiscard(false)}
         title="Discard changes?"
         confirmLabel="Discard"
       />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. This section does not replace a Will — it locates one. If you don't yet have a Will, this section can also act as a reminder to make one. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
+          <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. If you don't yet have a Will, this section can act as a reminder. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
 
-          {/* Status info */}
-          {will && (
-            <View className="bg-indigo-50 rounded-xl p-4 mb-4 flex-row items-center gap-3">
-              <Ionicons name="information-circle-outline" size={20} color="#4F46E5" />
-              <View className="flex-1">
-                <Text className="text-xs text-indigo-600 font-semibold">
+          {/* Status card */}
+          {will && form.hasWill && (
+            <View style={styles.statusCard}>
+              <View style={[styles.statusIcon, { backgroundColor: T.gold + '22' }]}>
+                <Ionicons name="checkmark-circle-outline" size={24} color={T.gold} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.statusTitle}>Will is recorded</Text>
+                <Text style={styles.statusSub}>
                   Last updated {timeAgo(will.updatedAt)}
                 </Text>
-                {will.reviewReminderDate && (
-                  <Text className="text-xs text-indigo-500">
-                    Review reminder: {formatDate(will.reviewReminderDate)}
-                  </Text>
-                )}
+              </View>
+            </View>
+          )}
+
+          {/* Will details (read-only view when saved) */}
+          {will && form.hasWill && (
+            <View style={styles.detailsCard}>
+              {[
+                { label: 'Executor', value: form.executorId ? executorOptions.find(o => o.value === form.executorId)?.label ?? '—' : '—' },
+                { label: 'Last reviewed', value: will.updatedAt ? formatDate(will.updatedAt) : '—' },
+                { label: 'Stored at', value: form.location || '—' },
+                { label: 'Status', value: form.registeredWith ? `Registered with ${form.registeredWith}` : 'Not registered' },
+              ].map((row, i, arr) => (
+                <View
+                  key={row.label}
+                  style={[styles.detailRow, i < arr.length - 1 && styles.detailRowBorder]}
+                >
+                  <Text style={styles.detailLabel}>{row.label}</Text>
+                  <Text style={styles.detailValue}>{row.value}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Review reminder */}
+          {will && form.hasWill && reviewOverdue && (
+            <View style={styles.reviewBox}>
+              <Ionicons name="time-outline" size={18} color={T.medTx} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.reviewTitle}>Review recommended</Text>
+                <Text style={styles.reviewBody}>
+                  Your Will review date has passed. Review and update it to ensure it reflects your current wishes.
+                </Text>
+                <TouchableOpacity onPress={handleSave} style={styles.reviewBtn}>
+                  <Text style={styles.reviewBtnText}>Mark as reviewed</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
 
           {/* Has Will toggle */}
-          <View className="bg-white rounded-xl p-4 mb-4 flex-row items-center justify-between"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.06,
-              shadowRadius: 4,
-              elevation: 2,
-            }}
-          >
-            <View className="flex-1">
-              <Text className="text-base font-semibold text-gray-900">
-                I have a Will
-              </Text>
-              <Text className="text-xs text-gray-500 mt-0.5">
-                Toggle on if you have a Will in place
-              </Text>
+          <View style={styles.toggleCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.toggleTitle}>I have a Will</Text>
+              <Text style={styles.toggleSub}>Toggle on if you have a Will in place</Text>
             </View>
             <Switch
               value={form.hasWill}
               onValueChange={(val) => setForm((f) => ({ ...f, hasWill: val }))}
-              trackColor={{ false: "#E5E7EB", true: "#A5B4FC" }}
-              thumbColor={form.hasWill ? "#4F46E5" : "#9CA3AF"}
+              trackColor={{ false: T.bdr, true: T.brand }}
+              thumbColor={form.hasWill ? T.brandL : T.txM}
             />
           </View>
 
           {!form.hasWill && (
-            <View className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <View className="flex-row items-center gap-2 mb-2">
-                <Ionicons name="warning-outline" size={18} color="#D97706" />
-                <Text className="text-sm font-semibold text-amber-800">
-                  Why a Will matters
-                </Text>
+            <View style={styles.whyWillBox}>
+              <View style={styles.whyWillHeader}>
+                <Ionicons name="warning-outline" size={16} color={T.amberL} />
+                <Text style={styles.whyWillTitle}>Why a Will matters</Text>
               </View>
-              <Text className="text-xs text-amber-700 leading-5">
-                Without a Will, your assets may not go to the people you intend.
-                A Will ensures your wishes are legally documented and your family
-                is protected. Consider consulting a lawyer to draft one.
+              <Text style={styles.whyWillBody}>
+                Without a Will, your assets may not go to the people you intend. A Will ensures your wishes are legally documented and your family is protected. Consider consulting a lawyer to draft one.
               </Text>
             </View>
           )}
 
           {form.hasWill && (
             <>
-              <View
-                className="bg-white rounded-xl p-4 mb-4"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                <Text className="text-sm font-semibold text-gray-700 mb-3">
-                  Will details
-                </Text>
+              <SelectField
+                label="Will type"
+                value={form.willType || undefined}
+                options={[{ value: '', label: 'Not specified' }, ...WILL_TYPE_OPTIONS]}
+                onChange={set('willType')}
+              />
 
-                <SelectField
-                  label="Will type"
-                  value={form.willType || undefined}
-                  options={[
-                    { value: "", label: "Not specified" },
-                    ...WILL_TYPE_OPTIONS,
-                  ]}
-                  onChange={set("willType")}
-                />
+              <FormField
+                label="Location of original Will"
+                value={form.location}
+                onChangeText={set('location')}
+                placeholder="e.g. Safe deposit box at SBI, Advocate's office"
+              />
 
-                <FormField
-                  label="Location of original Will"
-                  value={form.location}
-                  onChangeText={set("location")}
-                  placeholder="e.g. Safe deposit box at SBI, Advocate's office"
-                />
+              <FormField
+                label="Registered with"
+                value={form.registeredWith}
+                onChangeText={set('registeredWith')}
+                placeholder="e.g. Sub-Registrar office, SRO Koramangala"
+              />
 
-                <FormField
-                  label="Registered with"
-                  value={form.registeredWith}
-                  onChangeText={set("registeredWith")}
-                  placeholder="e.g. Sub-Registrar office, SRO Koramangala"
-                />
-              </View>
+              <SelectField
+                label="Executor (trusted person)"
+                value={form.executorId || undefined}
+                options={[{ value: '', label: 'None' }, ...executorOptions]}
+                onChange={set('executorId')}
+              />
 
-              <View
-                className="bg-white rounded-xl p-4 mb-4"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                <Text className="text-sm font-semibold text-gray-700 mb-3">
-                  Executor
-                </Text>
-
-                <SelectField
-                  label="Executor (trusted person)"
-                  value={form.executorId || undefined}
-                  options={[
-                    { value: "", label: "None" },
-                    ...executorOptions,
-                  ]}
-                  onChange={set("executorId")}
-                />
-              </View>
-
-              <View
-                className="bg-white rounded-xl p-4 mb-4"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                <Text className="text-sm font-semibold text-gray-700 mb-3">
-                  Review reminder
-                </Text>
-
-                <FormField
-                  label="Review reminder date"
-                  value={form.reviewReminderDate}
-                  onChangeText={set("reviewReminderDate")}
-                  placeholder="YYYY-MM-DD"
-                />
-              </View>
+              <FormField
+                label="Review reminder date"
+                value={form.reviewReminderDate}
+                onChangeText={set('reviewReminderDate')}
+                placeholder="YYYY-MM-DD"
+              />
             </>
           )}
 
-          <View
-            className="bg-white rounded-xl p-4 mb-6"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.06,
-              shadowRadius: 4,
-              elevation: 2,
-            }}
-          >
-            <FormField
-              label="Notes"
-              value={form.notes}
-              onChangeText={set("notes")}
-              placeholder="Any additional notes about your Will"
-              multiline
-              numberOfLines={4}
-              style={{ minHeight: 100, textAlignVertical: "top" }}
-            />
-          </View>
+          <FormField
+            label="Notes"
+            value={form.notes}
+            onChangeText={set('notes')}
+            placeholder="Any additional notes about your Will"
+            multiline
+            numberOfLines={4}
+            style={{ minHeight: 100, textAlignVertical: 'top' }}
+          />
 
           {isDirty && (
-            <View className="flex-row gap-3 mb-4">
+            <View style={styles.actionRow}>
               <TouchableOpacity
                 onPress={() => setShowDiscard(true)}
-                className="flex-1 border border-gray-300 rounded-xl py-3.5 items-center"
+                style={styles.discardBtn}
               >
-                <Text className="text-sm font-medium text-gray-700">
-                  Discard
-                </Text>
+                <Text style={styles.discardBtnText}>Discard</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={saving}
-                className="flex-1 bg-indigo-600 rounded-xl py-3.5 items-center"
+                style={styles.saveBtn}
               >
                 {saving ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white text-sm font-semibold">
-                    Save changes
-                  </Text>
+                  <Text style={styles.saveBtnText}>Save changes</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -370,13 +321,13 @@ export default function WillScreen() {
             <TouchableOpacity
               onPress={handleSave}
               disabled={saving}
-              className="bg-indigo-600 rounded-xl py-3.5 items-center mb-4"
+              style={styles.saveBtnFull}
             >
               {saving ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-white text-sm font-semibold">
-                  {will ? "Update Will record" : "Save Will record"}
+                <Text style={styles.saveBtnText}>
+                  {will ? 'Update Will record' : 'Save Will record'}
                 </Text>
               )}
             </TouchableOpacity>
@@ -386,3 +337,114 @@ export default function WillScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: T.surf2,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  statusIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusTitle: { fontSize: 15, fontWeight: '700', color: T.tx },
+  statusSub: { fontSize: 12, color: T.txS, marginTop: 2 },
+  detailsCard: {
+    backgroundColor: T.surf2,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  detailRowBorder: { borderBottomWidth: 1, borderBottomColor: T.bdrF },
+  detailLabel: { fontSize: 13, color: T.txM },
+  detailValue: { fontSize: 13, fontWeight: '600', color: T.tx },
+  reviewBox: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: T.medBg,
+    borderWidth: 1,
+    borderColor: T.medBdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  reviewTitle: { fontSize: 14, fontWeight: '700', color: T.tx, marginBottom: 4 },
+  reviewBody: { fontSize: 12, color: T.txS, lineHeight: 17 },
+  reviewBtn: {
+    marginTop: 10,
+    backgroundColor: T.amber,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignSelf: 'flex-start',
+  },
+  reviewBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  toggleCard: {
+    backgroundColor: T.surf2,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  toggleTitle: { fontSize: 15, fontWeight: '600', color: T.tx },
+  toggleSub: { fontSize: 12, color: T.txM, marginTop: 2 },
+  whyWillBox: {
+    backgroundColor: T.medBg,
+    borderWidth: 1,
+    borderColor: T.medBdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  whyWillHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  whyWillTitle: { fontSize: 13, fontWeight: '700', color: T.amberL },
+  whyWillBody: { fontSize: 12, color: T.txS, lineHeight: 18 },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  discardBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  discardBtnText: { fontSize: 14, fontWeight: '600', color: T.txS },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: T.brand,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  saveBtnFull: {
+    backgroundColor: T.brand,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+});

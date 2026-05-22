@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,31 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { InsurancePolicy, insuranceApi, POLICY_TYPE_LABELS } from "@/api/insurance";
-import { LoadingState } from "@/components/LoadingState";
-import { EmptyState } from "@/components/EmptyState";
-import { Toast, useToast } from "@/components/Toast";
-import { timeAgo, formatCurrency, formatDate } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { InsurancePolicy, insuranceApi, POLICY_TYPE_LABELS } from '@/api/insurance';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyState } from '@/components/EmptyState';
+import { Toast, useToast } from '@/components/Toast';
+import { TypeBadge } from '@/components/TypeBadge';
+import { CardWrap } from '@/components/CardWrap';
+import { SectionIntro } from '@/components/SectionIntro';
+import { timeAgo, formatCurrency, formatDate } from '@/utils/timeAgo';
+import { T, fmtINR } from '@/theme';
+
+function isDueSoon(month?: number, day?: number): boolean {
+  if (!month) return false;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  // Try this year's due date, else next year
+  let due = new Date(currentYear, month - 1, day ?? 1);
+  if (due < now) due = new Date(currentYear + 1, month - 1, day ?? 1);
+  const days = (due.getTime() - now.getTime()) / 86400000;
+  return days <= 30;
+}
 
 export default function InsuranceScreen() {
   const router = useRouter();
@@ -30,7 +45,7 @@ export default function InsuranceScreen() {
       const data = await insuranceApi.getAll();
       setPolicies(data);
     } catch {
-      showToast("Failed to load insurance policies", "error");
+      showToast('Failed to load insurance policies', 'error');
     }
   }, []);
 
@@ -47,20 +62,20 @@ export default function InsuranceScreen() {
 
   const handleDelete = (policy: InsurancePolicy) => {
     Alert.alert(
-      "Delete policy",
+      'Delete policy',
       `Delete "${policy.insurer} – ${POLICY_TYPE_LABELS[policy.policyType]}"? This cannot be undone.`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               await insuranceApi.delete(policy.id);
               setPolicies((prev) => prev.filter((p) => p.id !== policy.id));
-              showToast("Policy deleted", "success");
+              showToast('Policy deleted', 'success');
             } catch {
-              showToast("Failed to delete policy", "error");
+              showToast('Failed to delete policy', 'error');
             }
           },
         },
@@ -68,178 +83,209 @@ export default function InsuranceScreen() {
     );
   };
 
-  const POLICY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-    TERM_LIFE: "heart-outline",
-    WHOLE_LIFE: "heart",
-    HEALTH: "medical-outline",
-    VEHICLE: "car-outline",
-    PROPERTY: "home-outline",
-    OTHER: "shield-outline",
-  };
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {/* Header */}
-      <View className="bg-teal-600 px-5 pt-4 pb-8">
-        <Text className="text-xl font-bold text-white">Insurance</Text>
-        {!loading && policies.length > 0 && (
-          <Text className="text-teal-200 text-sm mt-0.5">
-            {policies.length} polic{policies.length !== 1 ? "ies" : "y"}
-          </Text>
-        )}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>Insurance</Text>
+          {!loading && policies.length > 0 && (
+            <Text style={styles.headerSub}>
+              {policies.length} polic{policies.length !== 1 ? 'ies' : 'y'}
+            </Text>
+          )}
+        </View>
+        <TouchableOpacity
+          onPress={() => router.push('/(app)/insurance/form')}
+          style={styles.addBtn}
+        >
+          <Ionicons name="add" size={20} color={T.brandL} />
+        </TouchableOpacity>
       </View>
 
-      <View className="flex-1 -mt-4">
-        <SectionIntro note="Life, health, accident and general insurance policies. Insurance is usually the first thing a family must claim — they cannot claim what they do not know exists. Include the policy document location; finding the original is often the hardest part." />
-
-        {loading ? (
-          <LoadingState message="Loading policies..." />
-        ) : policies.length === 0 ? (
+      {loading ? (
+        <LoadingState message="Loading policies..." />
+      ) : policies.length === 0 ? (
+        <>
+          <SectionIntro note="Life, health, accident and general insurance policies. Include the policy document location — finding the original is often the hardest part." />
           <EmptyState
             icon="shield-outline"
             title="No policies yet"
             subtitle="Add your insurance policies to keep track of coverage for your family."
             ctaLabel="Add policy"
-            onCta={() => router.push("/(app)/insurance/form")}
+            onCta={() => router.push('/(app)/insurance/form')}
           />
-        ) : (
-          <FlatList
-            data={policies}
-            keyExtractor={(item) => item.id}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#0D9488"
-              />
-            }
-            contentContainerStyle={{
-              paddingHorizontal: 16,
-              paddingTop: 8,
-              paddingBottom: 80,
-            }}
-            renderItem={({ item: policy }) => (
-              <TouchableOpacity
-                onPress={() =>
-                  router.push(`/(app)/insurance/form?id=${policy.id}`)
-                }
-                className="bg-white rounded-xl mb-3 overflow-hidden"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
+        </>
+      ) : (
+        <FlatList
+          data={policies}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={
+            <SectionIntro note="Life, health, accident and general insurance policies. Insurance is usually the first thing a family must claim — they cannot claim what they do not know exists." />
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brandL} />
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
+          renderItem={({ item: policy }) => {
+            const dueSoon = isDueSoon(policy.premiumDueMonth, policy.premiumDueDay);
+            return (
+              <CardWrap
+                onPress={() => router.push(`/(app)/insurance/form?id=${policy.id}`)}
+                style={styles.card}
               >
-                <View className="p-4">
-                  <View className="flex-row items-start gap-3">
-                    <View className="bg-teal-50 rounded-lg p-2.5">
-                      <Ionicons
-                        name={POLICY_ICONS[policy.policyType] ?? "shield-outline"}
-                        size={22}
-                        color="#0D9488"
-                      />
-                    </View>
-                    <View className="flex-1">
-                      <View className="flex-row items-center justify-between">
-                        <Text className="text-sm font-bold text-gray-900">
-                          {policy.insurer}
-                        </Text>
-                        <View className="flex-row gap-1">
-                          <TouchableOpacity
-                            onPress={() =>
-                              router.push(`/(app)/insurance/form?id=${policy.id}`)
-                            }
-                            className="p-1"
-                          >
-                            <Ionicons name="pencil-outline" size={14} color="#6B7280" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => handleDelete(policy)}
-                            className="p-1"
-                          >
-                            <Ionicons name="trash-outline" size={14} color="#EF4444" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                      <View className="bg-teal-100 rounded-full px-2 py-0.5 self-start mt-0.5">
-                        <Text className="text-teal-700 text-[10px] font-semibold">
-                          {POLICY_TYPE_LABELS[policy.policyType]}
-                        </Text>
-                      </View>
-
+                <View style={styles.cardContent}>
+                  {/* Top row */}
+                  <View style={styles.cardTop}>
+                    <View style={styles.cardLeft}>
+                      <TypeBadge code={policy.policyType} label={POLICY_TYPE_LABELS[policy.policyType]} />
+                      <Text style={styles.cardTitle}>{policy.insurer}</Text>
                       {policy.policyNumber && (
-                        <Text className="text-xs text-gray-500 mt-1.5">
-                          Policy: {policy.policyNumber}
-                        </Text>
+                        <Text style={styles.cardSub}>Policy: {policy.policyNumber}</Text>
                       )}
                       {policy.lifeAssured && (
-                        <Text className="text-xs text-gray-500">
-                          Assured: {policy.lifeAssured}
-                        </Text>
+                        <Text style={styles.cardSub}>Assured: {policy.lifeAssured}</Text>
                       )}
-
-                      <View className="flex-row gap-4 mt-2">
-                        {policy.sumAssured != null && (
-                          <View>
-                            <Text className="text-[10px] text-gray-400">Sum assured</Text>
-                            <Text className="text-xs font-semibold text-gray-800">
-                              {formatCurrency(policy.sumAssured)}
-                            </Text>
-                          </View>
-                        )}
-                        {policy.premiumAmount != null && (
-                          <View>
-                            <Text className="text-[10px] text-gray-400">Premium</Text>
-                            <Text className="text-xs font-semibold text-gray-800">
-                              {formatCurrency(policy.premiumAmount)}/yr
-                            </Text>
-                          </View>
-                        )}
-                        {policy.maturityDate && (
-                          <View>
-                            <Text className="text-[10px] text-gray-400">Matures</Text>
-                            <Text className="text-xs font-semibold text-gray-800">
-                              {formatDate(policy.maturityDate)}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-
-                      <Text className="text-xs text-gray-400 mt-2">
-                        Updated {timeAgo(policy.updatedAt)}
-                      </Text>
+                    </View>
+                    <View style={styles.cardRight}>
+                      {policy.sumAssured != null && (
+                        <>
+                          <Text style={styles.coverValue}>{fmtINR(policy.sumAssured)}</Text>
+                          <Text style={styles.coverLabel}>Cover</Text>
+                        </>
+                      )}
                     </View>
                   </View>
+
+                  {/* Due date */}
+                  {policy.maturityDate && (
+                    <View style={[styles.dueRow, dueSoon && styles.dueRowUrgent]}>
+                      <Ionicons
+                        name="calendar-outline"
+                        size={12}
+                        color={dueSoon ? T.redL : T.txS}
+                      />
+                      <Text style={[styles.dueText, dueSoon && styles.dueTextUrgent]}>
+                        Matures: {formatDate(policy.maturityDate)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Footer */}
+                  {policy.premiumAmount != null && (
+                    <View style={styles.footer}>
+                      <Text style={styles.footerLabel}>Annual premium</Text>
+                      <Text style={styles.footerValue}>{fmtINR(policy.premiumAmount)}</Text>
+                    </View>
+                  )}
                 </View>
-              </TouchableOpacity>
-            )}
-          />
-        )}
-      </View>
+
+                {/* Actions */}
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    onPress={() => router.push(`/(app)/insurance/form?id=${policy.id}`)}
+                    style={styles.actionBtn}
+                  >
+                    <Ionicons name="pencil-outline" size={14} color={T.txM} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(policy)} style={styles.actionBtn}>
+                    <Ionicons name="trash-outline" size={14} color={T.redL} />
+                  </TouchableOpacity>
+                </View>
+              </CardWrap>
+            );
+          }}
+        />
+      )}
 
       {/* FAB */}
       <TouchableOpacity
-        onPress={() => router.push("/(app)/insurance/form")}
-        className="absolute bottom-6 right-5 bg-teal-600 rounded-2xl w-14 h-14 items-center justify-center"
-        style={{
-          shadowColor: "#0D9488",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 8,
-          elevation: 6,
-        }}
+        onPress={() => router.push('/(app)/insurance/form')}
+        style={styles.fab}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  header: {
+    backgroundColor: T.surf,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: T.bdrF,
+  },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: T.tx },
+  headerSub: { fontSize: 12, color: T.txS, marginTop: 2 },
+  addBtn: {
+    backgroundColor: T.surf3,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 9,
+    padding: 9,
+  },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  cardLeft: { flex: 1 },
+  cardRight: { alignItems: 'flex-end', justifyContent: 'flex-start' },
+  cardTitle: { fontSize: 14, fontWeight: '700', color: T.tx, marginTop: 6, marginBottom: 2 },
+  cardSub: { fontSize: 12, color: T.txS },
+  coverValue: { fontSize: 13, fontWeight: '700', color: T.tx },
+  coverLabel: { fontSize: 10, color: T.txM, marginTop: 1 },
+  dueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    backgroundColor: T.surf3,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  dueRowUrgent: { backgroundColor: T.highBg, borderWidth: 1, borderColor: T.highBdr },
+  dueText: { fontSize: 11, color: T.txS },
+  dueTextUrgent: { color: T.redL, fontWeight: '600' },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: T.bdrF,
+  },
+  footerLabel: { fontSize: 12, color: T.txM },
+  footerValue: { fontSize: 12, fontWeight: '600', color: T.tx },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    gap: 6,
+  },
+  actionBtn: { padding: 5 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: T.brand,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: T.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+});

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,31 +6,24 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import {
   DigitalAccount,
   digitalAccountsApi,
   DIGITAL_ACCOUNT_CATEGORY_LABELS,
-} from "@/api/digitalAccounts";
-import { LoadingState } from "@/components/LoadingState";
-import { EmptyState } from "@/components/EmptyState";
-import { Toast, useToast } from "@/components/Toast";
-import { timeAgo } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
-
-const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  PASSWORD_MANAGER: "key-outline",
-  EMAIL: "mail-outline",
-  BANKING: "card-outline",
-  INVESTMENT: "trending-up-outline",
-  SOCIAL_MEDIA: "people-outline",
-  GOVERNMENT: "business-outline",
-  SUBSCRIPTION: "refresh-outline",
-  OTHER: "globe-outline",
-};
+} from '@/api/digitalAccounts';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyState } from '@/components/EmptyState';
+import { Toast, useToast } from '@/components/Toast';
+import { TypeBadge } from '@/components/TypeBadge';
+import { CardWrap } from '@/components/CardWrap';
+import { SectionIntro } from '@/components/SectionIntro';
+import { timeAgo } from '@/utils/timeAgo';
+import { T, CC } from '@/theme';
 
 export default function DigitalAccountsScreen() {
   const router = useRouter();
@@ -45,7 +38,7 @@ export default function DigitalAccountsScreen() {
       const data = await digitalAccountsApi.getAll();
       setAccounts(data);
     } catch {
-      showToast("Failed to load accounts", "error");
+      showToast('Failed to load accounts', 'error');
     }
   }, []);
 
@@ -62,20 +55,20 @@ export default function DigitalAccountsScreen() {
 
   const handleDelete = (account: DigitalAccount) => {
     Alert.alert(
-      "Delete account",
+      'Delete account',
       `Delete "${account.serviceName}"?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               await digitalAccountsApi.delete(account.id);
               setAccounts((prev) => prev.filter((a) => a.id !== account.id));
-              showToast("Account deleted", "success");
+              showToast('Account deleted', 'success');
             } catch {
-              showToast("Failed to delete", "error");
+              showToast('Failed to delete', 'error');
             }
           },
         },
@@ -83,128 +76,153 @@ export default function DigitalAccountsScreen() {
     );
   };
 
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
+  const InfoBanner = () => (
+    <View style={styles.infoBanner}>
+      <Ionicons name="information-circle-outline" size={16} color={T.brandL} />
+      <Text style={styles.infoText}>
+        Important: do not type passwords here. Note where the password is kept
+        (e.g. 'in Bitwarden vault' or 'sealed envelope with spouse').
+      </Text>
+    </View>
+  );
 
-      <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Important: do not type passwords directly here. Note where the password is kept (e.g. 'in Bitwarden vault' or 'sealed envelope with spouse'). This protects you while keeping access possible." />
+  return (
+    <SafeAreaView style={styles.root} edges={['bottom']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {loading ? (
         <LoadingState message="Loading accounts..." />
       ) : accounts.length === 0 ? (
-        <EmptyState
-          icon="laptop-outline"
-          title="No digital accounts"
-          subtitle="Document your online accounts and what should happen to them when you're gone."
-          ctaLabel="Add account"
-          onCta={() => router.push("/digital-accounts/form")}
-        />
+        <>
+          <InfoBanner />
+          <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Document your online accounts." />
+          <EmptyState
+            icon="laptop-outline"
+            title="No digital accounts"
+            subtitle="Document your online accounts and what should happen to them when you're gone."
+            ctaLabel="Add account"
+            onCta={() => router.push('/digital-accounts/form')}
+          />
+        </>
       ) : (
         <FlatList
           data={accounts}
           keyExtractor={(item) => item.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#2563EB"
-            />
+          ListHeaderComponent={
+            <>
+              <InfoBanner />
+              <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Important: do not type passwords directly here." />
+            </>
           }
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 12,
-            paddingBottom: 80,
-          }}
-          renderItem={({ item: account }) => (
-            <TouchableOpacity
-              onPress={() => router.push(`/digital-accounts/form?id=${account.id}`)}
-              className="bg-white rounded-xl mb-3 p-4"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.06,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <View className="flex-row items-start gap-3">
-                <View className="bg-blue-50 rounded-lg p-2.5">
-                  <Ionicons
-                    name={CATEGORY_ICONS[account.category] ?? "globe-outline"}
-                    size={20}
-                    color="#2563EB"
-                  />
-                </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center justify-between mb-0.5">
-                    <Text className="text-sm font-bold text-gray-900">
-                      {account.serviceName}
-                    </Text>
-                    <View className="flex-row gap-1">
-                      <TouchableOpacity
-                        onPress={() =>
-                          router.push(`/digital-accounts/form?id=${account.id}`)
-                        }
-                        className="p-1"
-                      >
-                        <Ionicons name="pencil-outline" size={14} color="#6B7280" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(account)}
-                        className="p-1"
-                      >
-                        <Ionicons name="trash-outline" size={14} color="#EF4444" />
-                      </TouchableOpacity>
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brand} />
+          }
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
+          renderItem={({ item: account }) => {
+            const colors = CC[account.category] ?? CC.BANKING;
+            return (
+              <CardWrap
+                onPress={() => router.push(`/digital-accounts/form?id=${account.id}`)}
+                style={styles.card}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.cardRow}>
+                    {/* Icon square */}
+                    <View style={[styles.iconSquare, { backgroundColor: colors.bg }]}>
+                      <Ionicons name="key-outline" size={18} color={colors.tx} />
+                    </View>
+                    <View style={styles.cardInfo}>
+                      <Text style={styles.serviceName}>{account.serviceName}</Text>
+                      <View style={styles.badgeRow}>
+                        <TypeBadge code={account.category} label={DIGITAL_ACCOUNT_CATEGORY_LABELS[account.category]} />
+                        {account.username && (
+                          <Text style={styles.username}>{account.username}</Text>
+                        )}
+                      </View>
+                      {account.credentialLocation && (
+                        <Text style={styles.credLoc}>Credentials: {account.credentialLocation}</Text>
+                      )}
+                    </View>
+                    <View style={styles.rightCol}>
+                      <Ionicons name="chevron-forward" size={16} color={T.txM} />
+                      <View style={styles.rowActions}>
+                        <TouchableOpacity
+                          onPress={() => router.push(`/digital-accounts/form?id=${account.id}`)}
+                          style={styles.actionBtn}
+                        >
+                          <Ionicons name="pencil-outline" size={13} color={T.txM} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleDelete(account)} style={styles.actionBtn}>
+                          <Ionicons name="trash-outline" size={13} color={T.redL} />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                  <View className="bg-blue-100 rounded-full px-2 py-0.5 self-start">
-                    <Text className="text-blue-700 text-[10px] font-semibold">
-                      {DIGITAL_ACCOUNT_CATEGORY_LABELS[account.category]}
-                    </Text>
-                  </View>
-                  {account.username && (
-                    <Text className="text-xs text-gray-500 mt-1.5">
-                      Username: {account.username}
-                    </Text>
-                  )}
-                  {account.credentialLocation && (
-                    <Text className="text-xs text-gray-500">
-                      Credentials: {account.credentialLocation}
-                    </Text>
-                  )}
-                  {account.actionOnDeath && (
-                    <Text className="text-xs text-gray-500">
-                      On death: {account.actionOnDeath}
-                    </Text>
-                  )}
-                  <Text className="text-xs text-gray-400 mt-1.5">
-                    Updated {timeAgo(account.updatedAt)}
-                  </Text>
                 </View>
-              </View>
-            </TouchableOpacity>
-          )}
+              </CardWrap>
+            );
+          }}
         />
       )}
 
       <TouchableOpacity
-        onPress={() => router.push("/digital-accounts/form")}
-        className="absolute bottom-6 right-5 bg-blue-600 rounded-2xl w-14 h-14 items-center justify-center"
-        style={{
-          shadowColor: "#2563EB",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 8,
-          elevation: 6,
-        }}
+        onPress={() => router.push('/digital-accounts/form')}
+        style={styles.fab}
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  infoBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: T.lowBg,
+    borderWidth: 1,
+    borderColor: T.lowBdr,
+    borderRadius: 10,
+    margin: 16,
+    marginBottom: 0,
+    padding: 12,
+  },
+  infoText: { flex: 1, fontSize: 12, color: T.txS, lineHeight: 17 },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  iconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  cardInfo: { flex: 1 },
+  serviceName: { fontSize: 14, fontWeight: '600', color: T.tx, marginBottom: 5 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  username: { fontSize: 11, color: T.txM },
+  credLoc: { fontSize: 11, color: T.txM, marginTop: 3 },
+  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 44 },
+  rowActions: { flexDirection: 'row', gap: 2 },
+  actionBtn: { padding: 4 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: T.brand,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: T.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+});

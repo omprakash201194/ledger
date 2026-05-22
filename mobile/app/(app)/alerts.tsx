@@ -1,57 +1,103 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   RefreshControl,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Alert, alertsApi, ALERT_COLORS } from "@/api/alerts";
-import { useAlertStore } from "@/store/alertStore";
-import { LoadingState } from "@/components/LoadingState";
-import { EmptyState } from "@/components/EmptyState";
-import { Toast, useToast } from "@/components/Toast";
-import { timeAgo } from "@/utils/timeAgo";
-import { SectionIntro } from "@/components/SectionIntro";
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert as AlertType, alertsApi } from '@/api/alerts';
+import { useAlertStore } from '@/store/alertStore';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyState } from '@/components/EmptyState';
+import { Toast, useToast } from '@/components/Toast';
+import { timeAgo } from '@/utils/timeAgo';
+import { T } from '@/theme';
 
-const ALERT_TYPE_LABELS: Record<string, string> = {
-  INSURANCE_PREMIUM_DUE: "Premium Due",
-  EMI_DUE: "EMI Due",
-  WILL_REVIEW_DUE: "Will Review",
-  WILL_NO_REVIEW: "No Will Set",
-  OBLIGATION_REVIEW: "Review Needed",
-  ASSET_VALUE_STALE: "Value Stale",
-  NOMINEE_MISSING: "Nominee Missing",
-  FD_MATURITY_DUE: "FD Matures Soon",
-  EMI_ENDING_SOON: "EMI Ending Soon",
+type Urgency = 'high' | 'medium' | 'low';
+
+const URGENCY_MAP: Record<string, Urgency> = {
+  NOMINEE_MISSING: 'high',
+  INSURANCE_PREMIUM_DUE: 'high',
+  FD_MATURITY_DUE: 'medium',
+  EMI_DUE: 'high',
+  EMI_ENDING_SOON: 'medium',
+  WILL_REVIEW_DUE: 'medium',
+  ASSET_VALUE_STALE: 'low',
+  WILL_NO_REVIEW: 'medium',
+  OBLIGATION_REVIEW: 'low',
 };
+
+const ALERT_ICONS: Record<string, string> = {
+  NOMINEE_MISSING: '👤',
+  INSURANCE_PREMIUM_DUE: '🛡',
+  FD_MATURITY_DUE: '⏱',
+  EMI_DUE: '💳',
+  EMI_ENDING_SOON: '📅',
+  WILL_REVIEW_DUE: '📄',
+  ASSET_VALUE_STALE: '📊',
+  WILL_NO_REVIEW: '📄',
+  OBLIGATION_REVIEW: '🔄',
+};
+
+const URGENCY_CONFIG: Record<
+  Urgency,
+  { label: string; bg: string; bdr: string; tx: string; dot: string; sectionLabel: string }
+> = {
+  high: {
+    label: 'HIGH',
+    bg: T.highBg,
+    bdr: T.highBdr,
+    tx: T.highTx,
+    dot: T.red,
+    sectionLabel: 'Needs immediate attention',
+  },
+  medium: {
+    label: 'MEDIUM',
+    bg: T.medBg,
+    bdr: T.medBdr,
+    tx: T.medTx,
+    dot: T.amber,
+    sectionLabel: 'Review soon',
+  },
+  low: {
+    label: 'LOW',
+    bg: T.lowBg,
+    bdr: T.lowBdr,
+    tx: T.lowTx,
+    dot: T.brand,
+    sectionLabel: 'For your awareness',
+  },
+};
+
+interface Section {
+  urgency: Urgency;
+  alerts: AlertType[];
+}
 
 export default function AlertsScreen() {
   const { setUnreadCount, decrementUnreadCount } = useAlertStore();
   const { toast, show: showToast, hide: hideToast } = useToast();
 
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchAlerts = useCallback(async () => {
     try {
       const data = await alertsApi.getAll();
-      // Unread first
       const sorted = [...data].sort((a, b) => {
         if (a.isRead === b.isRead) {
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
         return a.isRead ? 1 : -1;
       });
       setAlerts(sorted);
       setUnreadCount(sorted.filter((a) => !a.isRead).length);
     } catch {
-      showToast("Failed to load alerts", "error");
+      showToast('Failed to load alerts', 'error');
     }
   }, []);
 
@@ -66,7 +112,7 @@ export default function AlertsScreen() {
     setRefreshing(false);
   }, []);
 
-  const handleMarkRead = async (alert: Alert) => {
+  const handleMarkRead = async (alert: AlertType) => {
     if (alert.isRead) return;
     try {
       await alertsApi.markRead(alert.id);
@@ -75,110 +121,71 @@ export default function AlertsScreen() {
       );
       decrementUnreadCount();
     } catch {
-      showToast("Failed to mark as read", "error");
+      showToast('Failed to mark as read', 'error');
     }
   };
 
-  const renderAlert = ({ item }: { item: Alert }) => {
-    const colors = ALERT_COLORS[item.alertType] ?? {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      badge: "bg-gray-100",
-    };
+  // Group by urgency
+  const unread = alerts.filter((a) => !a.isRead);
+  const sections: Section[] = (['high', 'medium', 'low'] as Urgency[])
+    .map((urgency) => ({
+      urgency,
+      alerts: unread.filter((a) => (URGENCY_MAP[a.alertType] ?? 'low') === urgency),
+    }))
+    .filter((s) => s.alerts.length > 0);
+
+  const readAlerts = alerts.filter((a) => a.isRead);
+  const unreadCount = unread.length;
+
+  const renderAlertCard = (alert: AlertType) => {
+    const urgency = URGENCY_MAP[alert.alertType] ?? 'low';
+    const cfg = URGENCY_CONFIG[urgency];
+    const icon = ALERT_ICONS[alert.alertType] ?? '⚠️';
+
     return (
       <TouchableOpacity
-        onPress={() => handleMarkRead(item)}
-        className={`mx-4 mb-3 rounded-xl p-4 border ${
-          item.isRead ? "border-gray-100 bg-white" : `${colors.bg} border-transparent`
-        }`}
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
-          shadowRadius: 2,
-          elevation: 1,
-        }}
+        key={alert.id}
+        onPress={() => handleMarkRead(alert)}
+        style={[
+          styles.alertCard,
+          {
+            backgroundColor: alert.isRead ? T.surf2 : cfg.bg,
+            borderColor: alert.isRead ? T.bdr : cfg.bdr,
+          },
+        ]}
       >
-        <View className="flex-row items-start gap-3">
-          <View className={`${item.isRead ? "bg-gray-100" : colors.badge} rounded-lg p-2 mt-0.5`}>
-            <Ionicons
-              name="warning-outline"
-              size={16}
-              color={item.isRead ? "#9CA3AF" : "#374151"}
-            />
-          </View>
-          <View className="flex-1">
-            <View className="flex-row items-center justify-between mb-1">
-              <View
-                className={`${item.isRead ? "bg-gray-100" : colors.badge} rounded-full px-2 py-0.5`}
-              >
-                <Text
-                  className={`text-[10px] font-semibold ${
-                    item.isRead ? "text-gray-500" : colors.text
-                  }`}
-                >
-                  {ALERT_TYPE_LABELS[item.alertType] ?? item.alertType}
-                </Text>
-              </View>
-              {!item.isRead && (
-                <View className="w-2 h-2 rounded-full bg-indigo-500" />
-              )}
-            </View>
-            <Text
-              className={`text-sm font-semibold mb-0.5 ${
-                item.isRead ? "text-gray-500" : "text-gray-900"
-              }`}
-            >
-              {item.title}
-            </Text>
-            <Text
-              className={`text-xs ${item.isRead ? "text-gray-400" : "text-gray-600"}`}
-            >
-              {item.message}
-            </Text>
-            <Text className="text-xs text-gray-400 mt-1.5">
-              {timeAgo(item.createdAt)}
-              {!item.isRead && (
-                <Text className="text-indigo-500"> · Tap to dismiss</Text>
-              )}
-            </Text>
-          </View>
+        <View style={[styles.iconSquare, { backgroundColor: alert.isRead ? T.surf3 : cfg.bg }]}>
+          <Text style={styles.iconEmoji}>{icon}</Text>
+        </View>
+        <View style={styles.alertBody}>
+          <Text style={[styles.alertTitle, { color: alert.isRead ? T.txS : T.tx }]}>
+            {alert.title}
+          </Text>
+          <Text style={[styles.alertMsg, { color: alert.isRead ? T.txM : T.txS }]}>
+            {alert.message}
+          </Text>
+          <Text style={styles.alertTime}>
+            {timeAgo(alert.createdAt)}
+            {!alert.isRead && <Text style={{ color: T.brandL }}> · Tap to dismiss</Text>}
+          </Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  const unreadCount = alerts.filter((a) => !a.isRead).length;
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Toast
-        visible={toast.visible}
-        message={toast.message}
-        type={toast.type}
-        onHide={hideToast}
-      />
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {/* Header */}
-      <View className="px-5 pt-4 pb-3 flex-row items-center justify-between">
-        <View>
-          <Text className="text-xl font-bold text-gray-900">Alerts</Text>
-          {unreadCount > 0 && (
-            <Text className="text-xs text-gray-500">
-              {unreadCount} unread
-            </Text>
-          )}
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Alerts</Text>
         {unreadCount > 0 && (
-          <View className="bg-red-100 rounded-full px-3 py-1">
-            <Text className="text-red-600 text-xs font-semibold">
-              {unreadCount} new
-            </Text>
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadBadgeText}>{unreadCount} new</Text>
           </View>
         )}
       </View>
-
-      <SectionIntro note="Automatic reminders generated when something needs your attention — premiums coming due, nominations missing, Will reviews pending, EMIs ending. Acting on alerts keeps the rest of your information accurate and current." />
 
       {loading ? (
         <LoadingState message="Loading alerts..." />
@@ -190,19 +197,92 @@ export default function AlertsScreen() {
         />
       ) : (
         <FlatList
-          data={alerts}
-          keyExtractor={(item) => item.id}
-          renderItem={renderAlert}
+          data={[...sections, readAlerts.length > 0 ? { urgency: 'read' as const, alerts: readAlerts } : null].filter(Boolean)}
+          keyExtractor={(_, i) => String(i)}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#4F46E5"
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brandL} />
           }
-          contentContainerStyle={{ paddingTop: 4, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          renderItem={({ item: section }) => {
+            if (!section) return null;
+            if (section.urgency === 'read') {
+              return (
+                <View style={styles.sectionBlock}>
+                  <Text style={styles.sectionDimLabel}>DISMISSED</Text>
+                  {section.alerts.map(renderAlertCard)}
+                </View>
+              );
+            }
+            const cfg = URGENCY_CONFIG[section.urgency as Urgency];
+            return (
+              <View style={styles.sectionBlock}>
+                <View style={styles.sectionHeader}>
+                  <View style={[styles.dot, { backgroundColor: cfg.dot }]} />
+                  <Text style={[styles.sectionLabel, { color: cfg.tx }]}>
+                    {cfg.sectionLabel.toUpperCase()}
+                  </Text>
+                </View>
+                {section.alerts.map(renderAlertCard)}
+              </View>
+            );
+          }}
         />
       )}
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  header: {
+    backgroundColor: T.surf,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: T.bdrF,
+  },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: T.tx },
+  unreadBadge: {
+    backgroundColor: T.highBg,
+    borderWidth: 1,
+    borderColor: T.highBdr,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  unreadBadgeText: { color: T.highTx, fontSize: 12, fontWeight: '600' },
+  sectionBlock: { marginTop: 16 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginBottom: 8,
+  },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
+  sectionDimLabel: { fontSize: 11, fontWeight: '700', color: T.txM, letterSpacing: 0.6, marginBottom: 8 },
+  alertCard: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 6,
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  iconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconEmoji: { fontSize: 18 },
+  alertBody: { flex: 1 },
+  alertTitle: { fontSize: 13, fontWeight: '700', marginBottom: 3 },
+  alertMsg: { fontSize: 12, lineHeight: 17 },
+  alertTime: { fontSize: 11, color: T.txM, marginTop: 4 },
+});

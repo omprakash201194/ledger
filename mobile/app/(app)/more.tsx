@@ -1,208 +1,240 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useAuthStore } from "@/store/authStore";
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '@/store/authStore';
+import { useAlertStore } from '@/store/alertStore';
+import { T } from '@/theme';
 
-interface MenuSection {
-  title: string;
-  items: {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    subtitle?: string;
-    route?: string;
-    color: string;
-    bg: string;
-    action?: () => void;
-  }[];
+interface MenuItem {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  subtitle: string;
+  route?: string;
+  color: string;
+  action?: () => void;
+  badge?: number;
 }
 
 export default function MoreScreen() {
   const router = useRouter();
   const { name, email, logout } = useAuthStore();
+  const unreadAlerts = useAlertStore((s) => s.unreadCount);
 
   const handleLogout = () => {
-    Alert.alert("Sign out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert('Sign out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: "Sign out",
-        style: "destructive",
+        text: 'Sign out',
+        style: 'destructive',
         onPress: async () => {
           await logout();
-          router.replace("/(auth)/login");
+          router.replace('/(auth)/login');
         },
       },
     ]);
   };
 
-  const sections: MenuSection[] = [
+  const menuItems: MenuItem[] = [
     {
-      title: "Financial records",
-      items: [
-        {
-          icon: "trending-down-outline",
-          label: "Liabilities",
-          subtitle: "Loans, credit cards",
-          route: "/liabilities",
-          color: "#DC2626",
-          bg: "#FEF2F2",
-        },
-        {
-          icon: "repeat-outline",
-          label: "Recurring Obligations",
-          subtitle: "EMIs, SIPs, subscriptions",
-          route: "/recurring",
-          color: "#D97706",
-          bg: "#FFFBEB",
-        },
-        {
-          icon: "laptop-outline",
-          label: "Digital Accounts",
-          subtitle: "Passwords, online services",
-          route: "/digital-accounts",
-          color: "#2563EB",
-          bg: "#EFF6FF",
-        },
-      ],
+      icon: 'repeat-outline',
+      label: 'Recurring Obligations',
+      subtitle: 'EMIs, SIPs, subscriptions',
+      route: '/recurring',
+      color: T.amber,
     },
     {
-      title: "Estate planning",
-      items: [
-        {
-          icon: "document-text-outline",
-          label: "Will & Testament",
-          subtitle: "Your Will record",
-          route: "/will",
-          color: "#7C3AED",
-          bg: "#F5F3FF",
-        },
-        {
-          icon: "people-outline",
-          label: "Trusted Persons",
-          subtitle: "Family, advisors, executors",
-          route: "/trusted-persons",
-          color: "#0D9488",
-          bg: "#F0FDFA",
-        },
-      ],
+      icon: 'people-outline',
+      label: 'Trusted Persons',
+      subtitle: 'Family, advisors, executors',
+      route: '/trusted-persons',
+      color: T.green,
     },
     {
-      title: "Account",
-      items: [
-        {
-          icon: "log-out-outline",
-          label: "Sign out",
-          color: "#DC2626",
-          bg: "#FEF2F2",
-          action: handleLogout,
-        },
-      ],
+      icon: 'laptop-outline',
+      label: 'Digital Accounts',
+      subtitle: 'Passwords, online services',
+      route: '/digital-accounts',
+      color: T.brand,
+    },
+    {
+      icon: 'document-text-outline',
+      label: 'Will & Estate',
+      subtitle: 'Your Will record',
+      route: '/will',
+      color: T.gold,
+    },
+    {
+      icon: 'trending-down-outline',
+      label: 'Liabilities',
+      subtitle: 'Loans, credit cards',
+      route: '/liabilities',
+      color: T.red,
+    },
+    {
+      icon: 'notifications-outline',
+      label: 'Alerts',
+      subtitle: 'Reminders & notices',
+      route: '/(app)/alerts',
+      color: T.redL,
+      badge: unreadAlerts > 0 ? unreadAlerts : undefined,
     },
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        {/* Profile header */}
-        <View className="bg-indigo-600 px-5 pt-4 pb-8">
-          <Text className="text-xl font-bold text-white">More</Text>
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>More</Text>
         </View>
 
-        <View className="px-4 -mt-4">
-          {/* User card */}
-          <View
-            className="bg-white rounded-2xl p-4 mb-5 flex-row items-center gap-3"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 8,
-              elevation: 3,
-            }}
-          >
-            <View className="w-12 h-12 rounded-full bg-indigo-100 items-center justify-center">
-              <Text className="text-indigo-600 text-xl font-bold">
-                {(name ?? "?")[0]?.toUpperCase()}
-              </Text>
-            </View>
-            <View className="flex-1">
-              <Text className="text-base font-semibold text-gray-900">
-                {name || "User"}
-              </Text>
-              <Text className="text-sm text-gray-500">{email}</Text>
-            </View>
+        {/* User card */}
+        <View style={styles.userCard}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{(name ?? '?')[0]?.toUpperCase()}</Text>
           </View>
-
-          {sections.map((section) => (
-            <View key={section.title} className="mb-5">
-              <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1 mb-2">
-                {section.title}
-              </Text>
-              <View
-                className="bg-white rounded-2xl overflow-hidden"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                {section.items.map((item, index) => (
-                  <TouchableOpacity
-                    key={item.label}
-                    onPress={
-                      item.action
-                        ? item.action
-                        : () => router.push(item.route as any)
-                    }
-                    className={`flex-row items-center gap-3 px-4 py-3.5 ${
-                      index < section.items.length - 1
-                        ? "border-b border-gray-50"
-                        : ""
-                    }`}
-                  >
-                    <View
-                      className="w-9 h-9 rounded-lg items-center justify-center"
-                      style={{ backgroundColor: item.bg }}
-                    >
-                      <Ionicons name={item.icon} size={20} color={item.color} />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-sm font-medium text-gray-800">
-                        {item.label}
-                      </Text>
-                      {item.subtitle && (
-                        <Text className="text-xs text-gray-500">
-                          {item.subtitle}
-                        </Text>
-                      )}
-                    </View>
-                    {!item.action && (
-                      <Ionicons
-                        name="chevron-forward"
-                        size={16}
-                        color="#D1D5DB"
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          ))}
-
-          <Text className="text-center text-xs text-gray-400 mt-2">
-            Ledger v1.0.0 — Family Financial Legacy Register
-          </Text>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{name || 'User'}</Text>
+            <Text style={styles.userEmail}>{email}</Text>
+          </View>
         </View>
+
+        {/* Menu */}
+        <View style={styles.menuBlock}>
+          {menuItems.map((item, idx) => (
+            <TouchableOpacity
+              key={item.label}
+              onPress={item.action ? item.action : () => router.push(item.route as any)}
+              style={[
+                styles.menuRow,
+                idx < menuItems.length - 1 && styles.menuRowBorder,
+              ]}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: item.color + '22' }]}>
+                <Ionicons name={item.icon} size={20} color={item.color} />
+              </View>
+              <View style={styles.menuText}>
+                <Text style={styles.menuLabel}>{item.label}</Text>
+                <Text style={styles.menuSub}>{item.subtitle}</Text>
+              </View>
+              {item.badge != null && item.badge > 0 && (
+                <View style={styles.itemBadge}>
+                  <Text style={styles.itemBadgeText}>{item.badge}</Text>
+                </View>
+              )}
+              <Ionicons name="chevron-forward" size={16} color={T.txM} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Sign out */}
+        <TouchableOpacity onPress={handleLogout} style={styles.signOutRow}>
+          <Ionicons name="log-out-outline" size={18} color={T.redL} />
+          <Text style={styles.signOutText}>Sign out</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.version}>Ledger — Family Financial Legacy Register</Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: T.bg },
+  header: {
+    backgroundColor: T.surf,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: T.bdrF,
+  },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: T.tx },
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    margin: 16,
+    backgroundColor: T.surf2,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    padding: 16,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: T.brand + '33',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { color: T.brandL, fontSize: 20, fontWeight: '700' },
+  userInfo: { flex: 1 },
+  userName: { fontSize: 15, fontWeight: '600', color: T.tx },
+  userEmail: { fontSize: 12, color: T.txS, marginTop: 2 },
+  menuBlock: {
+    backgroundColor: T.surf2,
+    borderWidth: 1,
+    borderColor: T.bdr,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    gap: 12,
+  },
+  menuRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: T.bdrF,
+  },
+  menuIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuText: { flex: 1 },
+  menuLabel: { fontSize: 14, fontWeight: '600', color: T.tx },
+  menuSub: { fontSize: 11, color: T.txM, marginTop: 1 },
+  itemBadge: {
+    backgroundColor: T.red,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+    marginRight: 4,
+  },
+  itemBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  signOutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    backgroundColor: T.highBg,
+    borderWidth: 1,
+    borderColor: T.highBdr,
+    borderRadius: 12,
+    justifyContent: 'center',
+  },
+  signOutText: { fontSize: 14, fontWeight: '600', color: T.redL },
+  version: { textAlign: 'center', fontSize: 11, color: T.txM, marginTop: 20 },
+});

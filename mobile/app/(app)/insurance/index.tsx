@@ -15,6 +15,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo, formatCurrency, formatDate } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 export default function InsuranceScreen() {
   const router = useRouter();
@@ -96,6 +97,8 @@ export default function InsuranceScreen() {
       </View>
 
       <View className="flex-1 -mt-4">
+        <SectionIntro note="Document all active policies — life, health, vehicle, and property. Include the policy number and beneficiary so your family can file a claim quickly without searching through physical papers." />
+
         {loading ? (
           <LoadingState message="Loading policies..." />
         ) : policies.length === 0 ? (

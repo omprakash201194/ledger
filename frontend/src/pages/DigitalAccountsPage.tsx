@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getDigitalAccounts, createDigitalAccount, updateDigitalAccount, deleteDigitalAccount,
   type DigitalAccount, type DigitalAccountRequest, type DigitalAccountCategory, type ActionOnDeath,
@@ -94,6 +95,8 @@ export default function DigitalAccountsPage() {
           + Add account
         </button>
       </div>
+
+      <SectionIntro note="Record where your important online accounts are and where their credentials are stored. Never enter passwords here — just their location (e.g. 'Saved in Bitwarden vault') so your family can access them if needed." />
 
       {loading ? (
         <SkeletonCard rows={3} />

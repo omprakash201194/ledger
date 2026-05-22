@@ -20,6 +20,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo, formatCurrency } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 type SortKey = "value" | "name" | "recent";
 
@@ -118,6 +119,8 @@ export default function AssetsScreen() {
       </View>
 
       <View className="flex-1 -mt-4">
+        <SectionIntro note="Track every financial and physical asset your household owns — bank accounts, fixed deposits, investments, property, and gold. Assign a trusted person to each so your family knows who to contact." />
+
         {/* Sort chips */}
         <View className="flex-row gap-2 px-4 py-3">
           {(["recent", "value", "name"] as SortKey[]).map((key) => (

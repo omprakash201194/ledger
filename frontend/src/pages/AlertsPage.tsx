@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import { getAlerts, markAlertRead, markAllAlertsRead, type Alert, type AlertType } from '../api/alerts'
 
 const typeLabel: Record<AlertType, string> = {
@@ -69,6 +70,8 @@ export default function AlertsPage() {
           </button>
         )}
       </div>
+
+      <SectionIntro note="Automated reminders generated nightly — upcoming insurance premiums, loan maturities, stale asset values, and missing nominees. Address these regularly to keep your register accurate and complete." />
 
       {loading ? (
         <p className="text-sm text-gray-400">Loading…</p>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getInsurancePolicies, createInsurancePolicy, updateInsurancePolicy, deleteInsurancePolicy,
   type InsurancePolicy, type InsurancePolicyRequest, type PolicyType,
@@ -113,6 +114,8 @@ export default function InsurancePage() {
           + Add policy
         </button>
       </div>
+
+      <SectionIntro note="Document all active policies — life, health, vehicle, and property. Include the policy number and beneficiary so your family can file a claim quickly without searching through physical papers." />
 
       {loading ? (
         <SkeletonCard rows={3} />

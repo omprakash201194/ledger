@@ -14,6 +14,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 const ALERT_TYPE_LABELS: Record<string, string> = {
   INSURANCE_PREMIUM_DUE: "Premium Due",
@@ -176,6 +177,8 @@ export default function AlertsScreen() {
           </View>
         )}
       </View>
+
+      <SectionIntro note="Automated reminders generated nightly — upcoming insurance premiums, loan maturities, stale asset values, and missing nominees. Address these regularly to keep your register accurate and complete." />
 
       {loading ? (
         <LoadingState message="Loading alerts..." />

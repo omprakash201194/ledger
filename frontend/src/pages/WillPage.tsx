@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import { getWillRecord, upsertWillRecord, type WillRecord, type WillRecordRequest, type WillType } from '../api/will'
 import { getTrustedPersons, type TrustedPerson } from '../api/trustedPersons'
 import { FormField, inputCls, selectCls } from '../components/FormField'
@@ -68,6 +69,8 @@ export default function WillPage() {
         <h1 className="text-xl font-bold text-gray-800">Will &amp; Estate</h1>
         <p className="text-sm text-gray-500 mt-0.5">Document where your Will is stored and who your executor is.</p>
       </div>
+
+      <SectionIntro note="A Will tells your family exactly how to distribute your estate. Without one, they may face months of legal uncertainty. Record where the original document is stored and who the executor is — even a simple registered Will makes an enormous difference." />
 
       {/* E3: Status summary card — show when will is recorded */}
       {willRecord?.hasWill && (

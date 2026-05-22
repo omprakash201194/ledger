@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getLiabilities, createLiability, updateLiability, deleteLiability,
   type Liability, type LiabilityRequest, type LiabilityType,
@@ -101,6 +102,8 @@ export default function LiabilitiesPage() {
           + Add liability
         </button>
       </div>
+
+      <SectionIntro note="Record all outstanding loans and debts — home loans, car loans, personal loans, and credit cards. Your family needs to know which payments must continue and which need to be settled." />
 
       {loading ? (
         <SkeletonCard rows={3} />

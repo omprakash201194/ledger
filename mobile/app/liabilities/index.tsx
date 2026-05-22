@@ -19,6 +19,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo, formatCurrency, formatDate } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 export default function LiabilitiesScreen() {
   const router = useRouter();
@@ -97,6 +98,8 @@ export default function LiabilitiesScreen() {
           </Text>
         </View>
       )}
+
+      <SectionIntro note="Record all outstanding loans and debts — home loans, car loans, personal loans, and credit cards. Your family needs to know which payments must continue and which need to be settled." />
 
       {loading ? (
         <LoadingState message="Loading liabilities..." />

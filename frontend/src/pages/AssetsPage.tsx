@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getAssets, createAsset, updateAsset, deleteAsset,
   type Asset, type AssetRequest, type AssetType, type HoldingMode,
@@ -151,6 +152,8 @@ export default function AssetsPage() {
           + Add asset
         </button>
       </div>
+
+      <SectionIntro note="Track every financial and physical asset your household owns — bank accounts, fixed deposits, investments, property, and gold. Add an approximate value and assign a trusted person to each so your family knows exactly who to contact." />
 
       {/* A4: NOMINEE_MISSING contextual banner */}
       {nomineeMissingMsg && (

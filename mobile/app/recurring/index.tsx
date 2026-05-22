@@ -20,6 +20,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo, formatCurrency } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 export default function RecurringScreen() {
   const router = useRouter();
@@ -106,6 +107,8 @@ export default function RecurringScreen() {
           </Text>
         </View>
       )}
+
+      <SectionIntro note="Auto-debits and standing instructions that run every month — loan EMIs, SIPs, insurance premiums, and subscriptions. Your family needs to know which ones to keep running, cancel, or review." />
 
       {loading ? (
         <LoadingState message="Loading obligations..." />

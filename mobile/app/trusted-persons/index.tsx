@@ -20,6 +20,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
   FAMILY: { bg: "bg-teal-50", text: "text-teal-600", badge: "bg-teal-100" },
@@ -82,6 +83,8 @@ export default function TrustedPersonsScreen() {
         type={toast.type}
         onHide={hideToast}
       />
+
+      <SectionIntro note="People your family must contact in an emergency — a spouse, financial advisor, lawyer, or executor. These are the people who should know this register exists and how to use it." />
 
       {loading ? (
         <LoadingState message="Loading..." />

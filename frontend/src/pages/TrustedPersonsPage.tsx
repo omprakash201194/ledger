@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getTrustedPersons, createTrustedPerson, updateTrustedPerson, deleteTrustedPerson,
   type TrustedPerson, type TrustedPersonRequest, type TrustedPersonType,
@@ -83,6 +84,8 @@ export default function TrustedPersonsPage() {
           + Add person
         </button>
       </div>
+
+      <SectionIntro note="People your family must contact in an emergency — a spouse, financial advisor, lawyer, or executor. These are the people who should know this register exists and how to use it." />
 
       {loading ? (
         <SkeletonCard rows={3} />

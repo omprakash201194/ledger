@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SectionIntro from '../components/SectionIntro'
 import {
   getRecurringObligations, createRecurringObligation, updateRecurringObligation, deleteRecurringObligation,
   type RecurringObligation, type RecurringObligationRequest, type ObligationType, type Frequency, type ActionOnDeath,
@@ -100,6 +101,8 @@ export default function RecurringPage() {
           + Add
         </button>
       </div>
+
+      <SectionIntro note="Auto-debits and standing instructions that run every month — loan EMIs, SIPs, insurance premiums, and subscriptions. Your family needs to know which ones to keep running, cancel, or review." />
 
       {loading ? (
         <SkeletonCard rows={3} />

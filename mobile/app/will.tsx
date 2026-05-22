@@ -25,6 +25,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { Toast, useToast } from "@/components/Toast";
 import { LoadingState } from "@/components/LoadingState";
 import { formatDate, timeAgo } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 const WILL_TYPE_OPTIONS: SelectOption[] = (
   ["SINGLE", "JOINT", "NONE"] as WillType[]
@@ -167,6 +168,8 @@ export default function WillScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           keyboardShouldPersistTaps="handled"
         >
+          <SectionIntro note="A Will tells your family exactly how to distribute your estate. Without one, they may face months of legal uncertainty. Record where the original document is stored and who the executor is — even a simple registered Will makes an enormous difference." />
+
           {/* Status info */}
           {will && (
             <View className="bg-indigo-50 rounded-xl p-4 mb-4 flex-row items-center gap-3">

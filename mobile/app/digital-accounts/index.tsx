@@ -19,6 +19,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EmptyState } from "@/components/EmptyState";
 import { Toast, useToast } from "@/components/Toast";
 import { timeAgo } from "@/utils/timeAgo";
+import { SectionIntro } from "@/components/SectionIntro";
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   PASSWORD_MANAGER: "key-outline",
@@ -90,6 +91,8 @@ export default function DigitalAccountsScreen() {
         type={toast.type}
         onHide={hideToast}
       />
+
+      <SectionIntro note="Record where your important online accounts are and where their credentials are stored. Never enter passwords here — just their location (e.g. 'Saved in Bitwarden vault') so your family can access them if needed." />
 
       {loading ? (
         <LoadingState message="Loading accounts..." />

@@ -10,7 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
   Asset,
@@ -40,6 +40,7 @@ export default function AssetsScreen() {
   const router = useRouter();
   const { toast, show: showToast, hide: hideToast } = useToast();
   const { theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -215,7 +216,7 @@ export default function AssetsScreen() {
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {/* Screen header */}
@@ -382,6 +383,6 @@ export default function AssetsScreen() {
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

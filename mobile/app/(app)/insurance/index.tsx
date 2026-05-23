@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { InsurancePolicy, insuranceApi, POLICY_TYPE_LABELS } from '@/api/insurance';
 import { LoadingState } from '@/components/LoadingState';
@@ -36,6 +36,7 @@ export default function InsuranceScreen() {
   const router = useRouter();
   const { toast, show: showToast, hide: hideToast } = useToast();
   const { theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,7 +165,7 @@ export default function InsuranceScreen() {
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {/* Header */}
@@ -289,6 +290,6 @@ export default function InsuranceScreen() {
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -77,20 +77,20 @@ export default function TrustedPersonsPage() {
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Trusted Persons</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{persons.length} contact{persons.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Trusted Persons</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">{persons.length} contact{persons.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={openAdd} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
           + Add person
         </button>
       </div>
 
-      <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first. Add notes where useful — for example, 'spouse handles all banking' or 'CA holds Income Tax portal access.'" />
+      <SectionIntro sectionKey="trusted-persons" note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first. Add notes where useful — for example, 'spouse handles all banking' or 'CA holds Income Tax portal access.'" />
 
       {loading ? (
         <SkeletonCard rows={3} />
       ) : persons.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-4xl mb-3">👥</p>
           <p className="text-sm mb-4">No trusted persons yet. Add someone your family should contact.</p>
           <button onClick={openAdd} className="text-sm text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50">
@@ -100,18 +100,18 @@ export default function TrustedPersonsPage() {
       ) : (
         <div className="space-y-3">
           {persons.map(p => (
-            <div key={p.id} className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-start justify-between gap-3">
+            <div key={p.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-gray-800">{p.name}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{p.name}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeBadge[p.type]}`}>{p.type}</span>
-                  {p.relationship && <span className="text-xs text-gray-400">{p.relationship}</span>}
+                  {p.relationship && <span className="text-xs text-gray-400 dark:text-gray-500">{p.relationship}</span>}
                 </div>
                 <div className="flex gap-4 mt-1 flex-wrap">
-                  {p.phone && <span className="text-xs text-gray-500">📞 {p.phone}</span>}
-                  {p.email && <span className="text-xs text-gray-500">✉️ {p.email}</span>}
+                  {p.phone && <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">📞 {p.phone}</span>}
+                  {p.email && <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">✉️ {p.email}</span>}
                 </div>
-                {p.notes && <p className="text-xs text-gray-400 mt-1 truncate">{p.notes}</p>}
+                {p.notes && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate">{p.notes}</p>}
               </div>
               <div className="flex gap-2 shrink-0">
                 <button onClick={() => openEdit(p)} className="text-xs text-indigo-600 hover:underline">Edit</button>
@@ -161,7 +161,7 @@ export default function TrustedPersonsPage() {
               <button onClick={save} disabled={saving || !form.name.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg">
                 {saving ? 'Saving…' : editing ? 'Save changes' : 'Add person'}
               </button>
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
+              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm py-2 rounded-lg">Cancel</button>
             </div>
           </div>
         </Modal>
@@ -169,10 +169,10 @@ export default function TrustedPersonsPage() {
 
       {deleteId && (
         <Modal title="Delete person?" onClose={() => setDeleteId(null)}>
-          <p className="text-sm text-gray-600 mb-4">This will permanently remove the trusted person record.</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">This will permanently remove the trusted person record.</p>
           <div className="flex gap-3">
             <button onClick={confirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-lg">Delete</button>
-            <button onClick={() => setDeleteId(null)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
+            <button onClick={() => setDeleteId(null)} className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm py-2 rounded-lg">Cancel</button>
           </div>
         </Modal>
       )}

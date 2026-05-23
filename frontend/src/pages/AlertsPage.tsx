@@ -55,8 +55,8 @@ export default function AlertsPage() {
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Alerts</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Alerts</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">
             {unreadCount > 0 ? <span className="font-medium text-orange-600">{unreadCount} unread</span> : 'All caught up'}
           </p>
         </div>
@@ -71,12 +71,12 @@ export default function AlertsPage() {
         )}
       </div>
 
-      <SectionIntro note="Automatic reminders generated when something needs your attention — premiums coming due, nominations missing, Will reviews pending, EMIs ending. Acting on alerts keeps the rest of your information accurate and current." />
+      <SectionIntro sectionKey="alerts" note="Automatic reminders generated when something needs your attention — premiums coming due, nominations missing, Will reviews pending, EMIs ending. Acting on alerts keeps the rest of your information accurate and current." />
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading…</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">Loading…</p>
       ) : alerts.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-4xl mb-3">🔔</p>
           <p className="text-sm">No alerts. The nightly scanner will generate alerts when action is needed.</p>
         </div>
@@ -85,8 +85,8 @@ export default function AlertsPage() {
           {alerts.map(a => (
             <div
               key={a.id}
-              className={`bg-white rounded-xl border px-4 py-3 flex items-start justify-between gap-3 transition-opacity ${
-                a.isRead ? 'opacity-50 border-gray-100' : 'border-gray-200'
+              className={`bg-white dark:bg-gray-900 rounded-xl border px-4 py-3 flex items-start justify-between gap-3 transition-opacity ${
+                a.isRead ? 'opacity-50 border-gray-100 dark:border-gray-800' : 'border-gray-200 dark:border-gray-700'
               }`}
             >
               <div className="min-w-0 flex-1">
@@ -95,17 +95,17 @@ export default function AlertsPage() {
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[a.alertType]}`}>
                     {typeLabel[a.alertType]}
                   </span>
-                  {a.dueDate && <span className="text-xs text-gray-400">Due: {a.dueDate}</span>}
+                  {a.dueDate && <span className="text-xs text-gray-400 dark:text-gray-500">Due: {a.dueDate}</span>}
                 </div>
-                <p className="text-sm font-medium text-gray-800 mt-1">{a.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{a.message}</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-1">{a.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">{a.message}</p>
                 <p className="text-xs text-gray-300 mt-1">{new Date(a.createdAt).toLocaleDateString('en-IN')}</p>
               </div>
               {!a.isRead && (
                 <button
                   onClick={() => handleMarkRead(a.id)}
                   disabled={marking === a.id}
-                  className="shrink-0 text-xs text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  className="shrink-0 text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500 disabled:opacity-50"
                 >
                   {marking === a.id ? '…' : '✓'}
                 </button>

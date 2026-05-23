@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 
 interface Props {
   unreadAlerts?: number
+  isDark?: boolean
+  toggleTheme?: () => void
 }
 
 const mainItems = [
@@ -20,7 +22,7 @@ const moreItems = [
   { to: '/will', label: 'Will', icon: '📜' },
 ]
 
-export default function BottomNav({ unreadAlerts = 0 }: Props) {
+export default function BottomNav({ unreadAlerts = 0, isDark = false, toggleTheme }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -32,7 +34,7 @@ export default function BottomNav({ unreadAlerts = 0 }: Props) {
   return (
     <>
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 md:hidden z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex justify-around py-2 md:hidden z-50">
         {mainItems.map((item) => (
           <NavLink
             key={item.to}
@@ -40,7 +42,9 @@ export default function BottomNav({ unreadAlerts = 0 }: Props) {
             end={item.to === '/'}
             className={({ isActive }) =>
               `flex flex-col items-center text-xs gap-0.5 px-2 py-1 rounded ${
-                isActive ? 'text-indigo-600' : 'text-gray-500'
+                isActive
+                  ? 'text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-500 dark:text-gray-400'
               }`
             }
           >
@@ -52,7 +56,7 @@ export default function BottomNav({ unreadAlerts = 0 }: Props) {
         {/* More button */}
         <button
           onClick={() => setDrawerOpen(true)}
-          className="relative flex flex-col items-center text-xs gap-0.5 px-2 py-1 rounded text-gray-500"
+          className="relative flex flex-col items-center text-xs gap-0.5 px-2 py-1 rounded text-gray-500 dark:text-gray-400"
         >
           <span className="text-lg leading-none">⋯</span>
           <span>More</span>
@@ -67,22 +71,22 @@ export default function BottomNav({ unreadAlerts = 0 }: Props) {
       {/* More drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setDrawerOpen(false)}>
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/30 dark:bg-black/50" />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl pb-6 pt-3"
+            className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-xl pb-6 pt-3"
             onClick={e => e.stopPropagation()}
           >
             {/* Drag handle */}
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-4" />
 
             <div className="px-4 space-y-1">
               {moreItems.map(item => (
                 <button
                   key={item.to}
                   onClick={() => handleMoreNav(item.to)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-gray-50 text-left"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left"
                 >
-                  <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <span className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                     <span className="text-lg">{item.icon}</span>
                     <span>{item.label}</span>
                   </span>
@@ -93,6 +97,19 @@ export default function BottomNav({ unreadAlerts = 0 }: Props) {
                   )}
                 </button>
               ))}
+
+              {/* Theme toggle row */}
+              {toggleTheme && (
+                <button
+                  onClick={() => { toggleTheme(); setDrawerOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left"
+                >
+                  <span className="text-lg">{isDark ? '☀️' : '🌙'}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {isDark ? 'Light mode' : 'Dark mode'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>

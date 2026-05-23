@@ -56,7 +56,7 @@ export default function WillPage() {
     <div className="p-4 md:p-8 max-w-xl mx-auto">
       <div className="space-y-3 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-32" />
-        <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 space-y-3">
           {[1,2,3,4].map(i => <div key={i} className="h-4 bg-gray-200 rounded" />)}
         </div>
       </div>
@@ -66,11 +66,11 @@ export default function WillPage() {
   return (
     <div className="p-4 md:p-8 max-w-xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Will &amp; Estate</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Document where your Will is stored and who your executor is.</p>
+        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Will &amp; Estate</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">Document where your Will is stored and who your executor is.</p>
       </div>
 
-      <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. This section does not replace a Will — it locates one. If you don't yet have a Will, this section can also act as a reminder to make one. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
+      <SectionIntro sectionKey="will" note="Where your Will is kept, who your executor is, and the basic facts about it. This section does not replace a Will — it locates one. If you don't yet have a Will, this section can also act as a reminder to make one. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
 
       {/* E3: Status summary card — show when will is recorded */}
       {willRecord?.hasWill && (
@@ -100,16 +100,16 @@ export default function WillPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-5">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 space-y-5">
         <div className="flex items-center gap-3">
           <input
             id="hasWill"
             type="checkbox"
             checked={form.hasWill}
             onChange={e => setForm(f => ({ ...f, hasWill: e.target.checked }))}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
           />
-          <label htmlFor="hasWill" className="text-sm font-medium text-gray-700">I have a Will</label>
+          <label htmlFor="hasWill" className="text-sm font-medium text-gray-700 dark:text-gray-300">I have a Will</label>
         </div>
 
         {!form.hasWill && (

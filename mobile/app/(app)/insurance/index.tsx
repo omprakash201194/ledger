@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -19,13 +19,13 @@ import { TypeBadge } from '@/components/TypeBadge';
 import { CardWrap } from '@/components/CardWrap';
 import { SectionIntro } from '@/components/SectionIntro';
 import { timeAgo, formatCurrency, formatDate } from '@/utils/timeAgo';
-import { T, fmtINR } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { fmtINR } from '@/theme';
 
 function isDueSoon(month?: number, day?: number): boolean {
   if (!month) return false;
   const now = new Date();
   const currentYear = now.getFullYear();
-  // Try this year's due date, else next year
   let due = new Date(currentYear, month - 1, day ?? 1);
   if (due < now) due = new Date(currentYear + 1, month - 1, day ?? 1);
   const days = (due.getTime() - now.getTime()) / 86400000;
@@ -35,6 +35,7 @@ function isDueSoon(month?: number, day?: number): boolean {
 export default function InsuranceScreen() {
   const router = useRouter();
   const { toast, show: showToast, hide: hideToast } = useToast();
+  const { theme } = useAppTheme();
 
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,85 @@ export default function InsuranceScreen() {
     );
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    root: { flex: 1, backgroundColor: theme.bg },
+    header: {
+      backgroundColor: theme.surf,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottomWidth: 1,
+      borderBottomColor: theme.bdrF,
+    },
+    headerTitle: { fontSize: 20, fontWeight: '700', color: theme.tx },
+    headerSub: { fontSize: 12, color: theme.txS, marginTop: 2 },
+    addBtn: {
+      backgroundColor: theme.surf3,
+      borderWidth: 1,
+      borderColor: theme.bdr,
+      borderRadius: 9,
+      padding: 9,
+    },
+    card: { marginBottom: 8 },
+    cardContent: { padding: 14 },
+    cardTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+    cardLeft: { flex: 1 },
+    cardRight: { alignItems: 'flex-end', justifyContent: 'flex-start' },
+    cardTitle: { fontSize: 14, fontWeight: '700', color: theme.tx, marginTop: 6, marginBottom: 2 },
+    cardSub: { fontSize: 12, color: theme.txS },
+    coverValue: { fontSize: 13, fontWeight: '700', color: theme.tx },
+    coverLabel: { fontSize: 10, color: theme.txM, marginTop: 1 },
+    dueRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingVertical: 5,
+      paddingHorizontal: 8,
+      borderRadius: 6,
+      backgroundColor: theme.surf3,
+      alignSelf: 'flex-start',
+      marginBottom: 8,
+    },
+    dueRowUrgent: { backgroundColor: theme.highBg, borderWidth: 1, borderColor: theme.highBdr },
+    dueText: { fontSize: 11, color: theme.txS },
+    dueTextUrgent: { color: theme.redL, fontWeight: '600' },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: theme.bdrF,
+    },
+    footerLabel: { fontSize: 12, color: theme.txM },
+    footerValue: { fontSize: 12, fontWeight: '600', color: theme.tx },
+    actions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 10,
+      paddingBottom: 10,
+      gap: 6,
+    },
+    actionBtn: { padding: 5 },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 20,
+      backgroundColor: theme.brand,
+      borderRadius: 18,
+      width: 56,
+      height: 56,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: theme.brand,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.5,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+  }), [theme]);
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
@@ -101,32 +181,34 @@ export default function InsuranceScreen() {
           onPress={() => router.push('/(app)/insurance/form')}
           style={styles.addBtn}
         >
-          <Ionicons name="add" size={20} color={T.brandL} />
+          <Ionicons name="add" size={20} color={theme.brandL} />
         </TouchableOpacity>
       </View>
+
+      {/* Section intro — always visible above the list/empty branch */}
+      {!loading && (
+        <SectionIntro
+          sectionKey="insurance"
+          note="Life, health, accident and general insurance policies. Include the policy document location — finding the original is often the hardest part."
+        />
+      )}
 
       {loading ? (
         <LoadingState message="Loading policies..." />
       ) : policies.length === 0 ? (
-        <>
-          <SectionIntro note="Life, health, accident and general insurance policies. Include the policy document location — finding the original is often the hardest part." />
-          <EmptyState
-            icon="shield-outline"
-            title="No policies yet"
-            subtitle="Add your insurance policies to keep track of coverage for your family."
-            ctaLabel="Add policy"
-            onCta={() => router.push('/(app)/insurance/form')}
-          />
-        </>
+        <EmptyState
+          icon="shield-outline"
+          title="No policies yet"
+          subtitle="Add your insurance policies to keep track of coverage for your family."
+          ctaLabel="Add policy"
+          onCta={() => router.push('/(app)/insurance/form')}
+        />
       ) : (
         <FlatList
           data={policies}
           keyExtractor={(item) => item.id}
-          ListHeaderComponent={
-            <SectionIntro note="Life, health, accident and general insurance policies. Insurance is usually the first thing a family must claim — they cannot claim what they do not know exists." />
-          }
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brandL} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.brandL} />
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
           renderItem={({ item: policy }) => {
@@ -165,7 +247,7 @@ export default function InsuranceScreen() {
                       <Ionicons
                         name="calendar-outline"
                         size={12}
-                        color={dueSoon ? T.redL : T.txS}
+                        color={dueSoon ? theme.redL : theme.txS}
                       />
                       <Text style={[styles.dueText, dueSoon && styles.dueTextUrgent]}>
                         Matures: {formatDate(policy.maturityDate)}
@@ -188,10 +270,10 @@ export default function InsuranceScreen() {
                     onPress={() => router.push(`/(app)/insurance/form?id=${policy.id}`)}
                     style={styles.actionBtn}
                   >
-                    <Ionicons name="pencil-outline" size={14} color={T.txM} />
+                    <Ionicons name="pencil-outline" size={14} color={theme.txM} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDelete(policy)} style={styles.actionBtn}>
-                    <Ionicons name="trash-outline" size={14} color={T.redL} />
+                    <Ionicons name="trash-outline" size={14} color={theme.redL} />
                   </TouchableOpacity>
                 </View>
               </CardWrap>
@@ -210,82 +292,3 @@ export default function InsuranceScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  header: {
-    backgroundColor: T.surf,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: T.bdrF,
-  },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: T.tx },
-  headerSub: { fontSize: 12, color: T.txS, marginTop: 2 },
-  addBtn: {
-    backgroundColor: T.surf3,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 9,
-    padding: 9,
-  },
-  card: { marginBottom: 8 },
-  cardContent: { padding: 14 },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  cardLeft: { flex: 1 },
-  cardRight: { alignItems: 'flex-end', justifyContent: 'flex-start' },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: T.tx, marginTop: 6, marginBottom: 2 },
-  cardSub: { fontSize: 12, color: T.txS },
-  coverValue: { fontSize: 13, fontWeight: '700', color: T.tx },
-  coverLabel: { fontSize: 10, color: T.txM, marginTop: 1 },
-  dueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingVertical: 5,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    backgroundColor: T.surf3,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  dueRowUrgent: { backgroundColor: T.highBg, borderWidth: 1, borderColor: T.highBdr },
-  dueText: { fontSize: 11, color: T.txS },
-  dueTextUrgent: { color: T.redL, fontWeight: '600' },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: T.bdrF,
-  },
-  footerLabel: { fontSize: 12, color: T.txM },
-  footerValue: { fontSize: 12, fontWeight: '600', color: T.tx },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-    gap: 6,
-  },
-  actionBtn: { padding: 5 },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    backgroundColor: T.brand,
-    borderRadius: 18,
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: T.brand,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

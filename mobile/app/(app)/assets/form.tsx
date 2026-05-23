@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ import { SelectField, SelectOption } from '@/components/SelectField';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { Toast, useToast } from '@/components/Toast';
 import { LoadingState } from '@/components/LoadingState';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 const HOLDING_MODE_OPTIONS: SelectOption[] = (
   ['SINGLE', 'JOINT', 'EITHER_OR_SURVIVOR'] as HoldingMode[]
@@ -84,6 +84,82 @@ function assetToForm(a: Asset): FormState {
 
 export default function AssetFormScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.bg },
+  header: {
+    backgroundColor: theme.surf,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.bdrF,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backBtn: { padding: 2 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: theme.tx },
+  formContent: { padding: 16, paddingBottom: 40 },
+  fieldLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.txM,
+    letterSpacing: 0.8,
+    marginBottom: 4,
+    marginTop: 12,
+  },
+  fieldHint: { fontSize: 11, color: theme.txM, marginBottom: 6 },
+  typeSelector: {
+    backgroundColor: theme.surf3,
+    borderWidth: 1,
+    borderColor: theme.bdr,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  catHeader: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: theme.txM,
+    letterSpacing: 0.6,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  typeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.bdrF,
+  },
+  typeRowSelected: {
+    backgroundColor: 'rgba(61,110,158,0.15)',
+  },
+  typeRowText: { fontSize: 14, color: theme.txS },
+  typeRowTextSelected: { color: theme.brandL, fontWeight: '600' },
+  errorText: { fontSize: 11, color: theme.redL, marginBottom: 6 },
+  moreToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 14,
+    justifyContent: 'center',
+  },
+  moreToggleText: { fontSize: 14, fontWeight: '600', color: theme.brandL },
+  divider: { height: 1, backgroundColor: theme.bdrF, marginBottom: 12 },
+  saveBtn: {
+    backgroundColor: theme.brand,
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+}), [theme]);
+
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEdit = !!id;
   const { toast, show: showToast, hide: hideToast } = useToast();
@@ -211,7 +287,7 @@ export default function AssetFormScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={T.tx} />
+          <Ionicons name="arrow-back" size={22} color={theme.tx} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{isEdit ? 'Edit Asset' : 'Add Asset'}</Text>
       </View>
@@ -249,7 +325,7 @@ export default function AssetFormScreen() {
                       {ASSET_TYPE_LABELS[t]}
                     </Text>
                     {form.assetType === t && (
-                      <Ionicons name="checkmark" size={16} color={T.brandL} />
+                      <Ionicons name="checkmark" size={16} color={theme.brandL} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -297,7 +373,7 @@ export default function AssetFormScreen() {
             <Ionicons
               name={showMore ? 'chevron-up' : 'chevron-down'}
               size={16}
-              color={T.brandL}
+              color={theme.brandL}
             />
           </TouchableOpacity>
 
@@ -389,77 +465,3 @@ export default function AssetFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  header: {
-    backgroundColor: T.surf,
-    borderBottomWidth: 1,
-    borderBottomColor: T.bdrF,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  backBtn: { padding: 2 },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: T.tx },
-  formContent: { padding: 16, paddingBottom: 40 },
-  fieldLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: T.txM,
-    letterSpacing: 0.8,
-    marginBottom: 4,
-    marginTop: 12,
-  },
-  fieldHint: { fontSize: 11, color: T.txM, marginBottom: 6 },
-  typeSelector: {
-    backgroundColor: T.surf3,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  catHeader: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: T.txM,
-    letterSpacing: 0.6,
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 4,
-  },
-  typeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: T.bdrF,
-  },
-  typeRowSelected: {
-    backgroundColor: 'rgba(61,110,158,0.15)',
-  },
-  typeRowText: { fontSize: 14, color: T.txS },
-  typeRowTextSelected: { color: T.brandL, fontWeight: '600' },
-  errorText: { fontSize: 11, color: T.redL, marginBottom: 6 },
-  moreToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    justifyContent: 'center',
-  },
-  moreToggleText: { fontSize: 14, fontWeight: '600', color: T.brandL },
-  divider: { height: 1, backgroundColor: T.bdrF, marginBottom: 12 },
-  saveBtn: {
-    backgroundColor: T.brand,
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-});

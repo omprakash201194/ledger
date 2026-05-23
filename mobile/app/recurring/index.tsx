@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -23,20 +23,76 @@ import { Toast, useToast } from '@/components/Toast';
 import { CardWrap } from '@/components/CardWrap';
 import { SectionIntro } from '@/components/SectionIntro';
 import { formatCurrency } from '@/utils/timeAgo';
-import { T, fmtINR } from '@/theme';
-
-const OBL_COLORS: Record<string, string> = {
-  EMI: T.redL,
-  SIP: T.greenL,
-  INSURANCE_PREMIUM: T.brandL,
-  SUBSCRIPTION: T.amberL,
-  RENT: T.gold,
-  UTILITY: T.txS,
-  OTHER: T.txS,
-};
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { fmtINR } from '@/theme';
 
 export default function RecurringScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
+
+  const OBL_COLORS: Record<string, string> = {
+    EMI: theme.redL,
+    SIP: theme.greenL,
+    INSURANCE_PREMIUM: theme.brandL,
+    SUBSCRIPTION: theme.amberL,
+    RENT: theme.gold,
+    UTILITY: theme.txS,
+    OTHER: theme.txS,
+  };
+  const styles = useMemo(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.bg },
+  headerBanner: {
+    backgroundColor: theme.surf,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.bdrF,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  bannerLabel: { fontSize: 10, color: theme.txM, fontWeight: '600', letterSpacing: 0.8 },
+  bannerValue: { fontSize: 20, fontWeight: '700', color: theme.amberL },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  iconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  info: { flex: 1 },
+  payee: { fontSize: 14, fontWeight: '600', color: theme.tx, marginBottom: 3 },
+  typeLine: { fontSize: 11, color: theme.txM },
+  amountCol: { alignItems: 'flex-end' },
+  amount: { fontSize: 15, fontWeight: '700', color: theme.tx },
+  amountSuffix: { fontSize: 11, color: theme.txM },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    gap: 4,
+  },
+  actionBtn: { padding: 5 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: theme.amber,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.amber,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+}), [theme]);
+
   const { toast, show: showToast, hide: hideToast } = useToast();
 
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
@@ -122,7 +178,7 @@ export default function RecurringScreen() {
         <LoadingState message="Loading obligations..." />
       ) : obligations.length === 0 ? (
         <>
-          <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account." />
+          <SectionIntro sectionKey="recurring" note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account." />
           <EmptyState
             icon="repeat-outline"
             title="No recurring obligations"
@@ -136,14 +192,14 @@ export default function RecurringScreen() {
           data={obligations}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <SectionIntro note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account whether or not you act on it." />
+            <SectionIntro sectionKey="recurring" note="Auto-debits, SIPs, subscriptions and standing instructions — anything that keeps charging your account." />
           }
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.amber} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.amber} />
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
           renderItem={({ item: obligation }) => {
-            const color = OBL_COLORS[obligation.obligationType] ?? T.txS;
+            const color = OBL_COLORS[obligation.obligationType] ?? theme.txS;
             return (
               <CardWrap
                 onPress={() => router.push(`/recurring/form?id=${obligation.id}`)}
@@ -175,10 +231,10 @@ export default function RecurringScreen() {
                     onPress={() => router.push(`/recurring/form?id=${obligation.id}`)}
                     style={styles.actionBtn}
                   >
-                    <Ionicons name="pencil-outline" size={13} color={T.txM} />
+                    <Ionicons name="pencil-outline" size={13} color={theme.txM} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDelete(obligation)} style={styles.actionBtn}>
-                    <Ionicons name="trash-outline" size={13} color={T.redL} />
+                    <Ionicons name="trash-outline" size={13} color={theme.redL} />
                   </TouchableOpacity>
                 </View>
               </CardWrap>
@@ -197,56 +253,3 @@ export default function RecurringScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  headerBanner: {
-    backgroundColor: T.surf,
-    borderBottomWidth: 1,
-    borderBottomColor: T.bdrF,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  bannerLabel: { fontSize: 10, color: T.txM, fontWeight: '600', letterSpacing: 0.8 },
-  bannerValue: { fontSize: 20, fontWeight: '700', color: T.amberL },
-  card: { marginBottom: 8 },
-  cardContent: { padding: 14 },
-  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  iconSquare: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  info: { flex: 1 },
-  payee: { fontSize: 14, fontWeight: '600', color: T.tx, marginBottom: 3 },
-  typeLine: { fontSize: 11, color: T.txM },
-  amountCol: { alignItems: 'flex-end' },
-  amount: { fontSize: 15, fontWeight: '700', color: T.tx },
-  amountSuffix: { fontSize: 11, color: T.txM },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-    gap: 4,
-  },
-  actionBtn: { padding: 5 },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    backgroundColor: T.amber,
-    borderRadius: 18,
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: T.amber,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

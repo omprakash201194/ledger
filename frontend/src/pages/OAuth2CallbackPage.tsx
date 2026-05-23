@@ -22,8 +22,8 @@ export default function OAuth2CallbackPage() {
   }, [params, login, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <p className="text-sm text-gray-500">Completing sign-in…</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Completing sign-in…</p>
     </div>
   )
 }

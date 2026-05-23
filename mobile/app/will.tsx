@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -27,7 +27,7 @@ import { Toast, useToast } from '@/components/Toast';
 import { LoadingState } from '@/components/LoadingState';
 import { SectionIntro } from '@/components/SectionIntro';
 import { formatDate, timeAgo } from '@/utils/timeAgo';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 const WILL_TYPE_OPTIONS: SelectOption[] = (
   ['SINGLE', 'JOINT', 'NONE'] as WillType[]
@@ -56,6 +56,118 @@ function willToForm(w: WillRecord): FormState {
 }
 
 export default function WillScreen() {
+  const { theme } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.bg },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: theme.surf2,
+    borderWidth: 1,
+    borderColor: theme.bdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  statusIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusTitle: { fontSize: 15, fontWeight: '700', color: theme.tx },
+  statusSub: { fontSize: 12, color: theme.txS, marginTop: 2 },
+  detailsCard: {
+    backgroundColor: theme.surf2,
+    borderWidth: 1,
+    borderColor: theme.bdr,
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  detailRowBorder: { borderBottomWidth: 1, borderBottomColor: theme.bdrF },
+  detailLabel: { fontSize: 13, color: theme.txM },
+  detailValue: { fontSize: 13, fontWeight: '600', color: theme.tx },
+  reviewBox: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: theme.medBg,
+    borderWidth: 1,
+    borderColor: theme.medBdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  reviewTitle: { fontSize: 14, fontWeight: '700', color: theme.tx, marginBottom: 4 },
+  reviewBody: { fontSize: 12, color: theme.txS, lineHeight: 17 },
+  reviewBtn: {
+    marginTop: 10,
+    backgroundColor: theme.amber,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignSelf: 'flex-start',
+  },
+  reviewBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  toggleCard: {
+    backgroundColor: theme.surf2,
+    borderWidth: 1,
+    borderColor: theme.bdr,
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  toggleTitle: { fontSize: 15, fontWeight: '600', color: theme.tx },
+  toggleSub: { fontSize: 12, color: theme.txM, marginTop: 2 },
+  whyWillBox: {
+    backgroundColor: theme.medBg,
+    borderWidth: 1,
+    borderColor: theme.medBdr,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  whyWillHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  whyWillTitle: { fontSize: 13, fontWeight: '700', color: theme.amberL },
+  whyWillBody: { fontSize: 12, color: theme.txS, lineHeight: 18 },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  discardBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: theme.bdr,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  discardBtnText: { fontSize: 14, fontWeight: '600', color: theme.txS },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: theme.brand,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  saveBtnFull: {
+    backgroundColor: theme.brand,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+}), [theme]);
+
   const { toast, show: showToast, hide: hideToast } = useToast();
 
   const [will, setWill] = useState<WillRecord | null>(null);
@@ -167,13 +279,13 @@ export default function WillScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <SectionIntro note="Where your Will is kept, who your executor is, and the basic facts about it. If you don't yet have a Will, this section can act as a reminder. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
+          <SectionIntro sectionKey="will" note="Where your Will is kept, who your executor is, and the basic facts about it. If you don't yet have a Will, this section can act as a reminder. Indian succession law treats a registered Will as the definitive instruction; nominations alone are not enough." />
 
           {/* Status card */}
           {will && form.hasWill && (
             <View style={styles.statusCard}>
-              <View style={[styles.statusIcon, { backgroundColor: T.gold + '22' }]}>
-                <Ionicons name="checkmark-circle-outline" size={24} color={T.gold} />
+              <View style={[styles.statusIcon, { backgroundColor: theme.gold + '22' }]}>
+                <Ionicons name="checkmark-circle-outline" size={24} color={theme.gold} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.statusTitle}>Will is recorded</Text>
@@ -207,7 +319,7 @@ export default function WillScreen() {
           {/* Review reminder */}
           {will && form.hasWill && reviewOverdue && (
             <View style={styles.reviewBox}>
-              <Ionicons name="time-outline" size={18} color={T.medTx} />
+              <Ionicons name="time-outline" size={18} color={theme.medTx} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.reviewTitle}>Review recommended</Text>
                 <Text style={styles.reviewBody}>
@@ -229,15 +341,15 @@ export default function WillScreen() {
             <Switch
               value={form.hasWill}
               onValueChange={(val) => setForm((f) => ({ ...f, hasWill: val }))}
-              trackColor={{ false: T.bdr, true: T.brand }}
-              thumbColor={form.hasWill ? T.brandL : T.txM}
+              trackColor={{ false: theme.bdr, true: theme.brand }}
+              thumbColor={form.hasWill ? theme.brandL : theme.txM}
             />
           </View>
 
           {!form.hasWill && (
             <View style={styles.whyWillBox}>
               <View style={styles.whyWillHeader}>
-                <Ionicons name="warning-outline" size={16} color={T.amberL} />
+                <Ionicons name="warning-outline" size={16} color={theme.amberL} />
                 <Text style={styles.whyWillTitle}>Why a Will matters</Text>
               </View>
               <Text style={styles.whyWillBody}>
@@ -338,113 +450,3 @@ export default function WillScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  statusCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: T.surf2,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-  },
-  statusIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statusTitle: { fontSize: 15, fontWeight: '700', color: T.tx },
-  statusSub: { fontSize: 12, color: T.txS, marginTop: 2 },
-  detailsCard: {
-    backgroundColor: T.surf2,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  detailRowBorder: { borderBottomWidth: 1, borderBottomColor: T.bdrF },
-  detailLabel: { fontSize: 13, color: T.txM },
-  detailValue: { fontSize: 13, fontWeight: '600', color: T.tx },
-  reviewBox: {
-    flexDirection: 'row',
-    gap: 10,
-    backgroundColor: T.medBg,
-    borderWidth: 1,
-    borderColor: T.medBdr,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-  },
-  reviewTitle: { fontSize: 14, fontWeight: '700', color: T.tx, marginBottom: 4 },
-  reviewBody: { fontSize: 12, color: T.txS, lineHeight: 17 },
-  reviewBtn: {
-    marginTop: 10,
-    backgroundColor: T.amber,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    alignSelf: 'flex-start',
-  },
-  reviewBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
-  toggleCard: {
-    backgroundColor: T.surf2,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 12,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  toggleTitle: { fontSize: 15, fontWeight: '600', color: T.tx },
-  toggleSub: { fontSize: 12, color: T.txM, marginTop: 2 },
-  whyWillBox: {
-    backgroundColor: T.medBg,
-    borderWidth: 1,
-    borderColor: T.medBdr,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-  },
-  whyWillHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  whyWillTitle: { fontSize: 13, fontWeight: '700', color: T.amberL },
-  whyWillBody: { fontSize: 12, color: T.txS, lineHeight: 18 },
-  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  discardBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  discardBtnText: { fontSize: 14, fontWeight: '600', color: T.txS },
-  saveBtn: {
-    flex: 1,
-    backgroundColor: T.brand,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  saveBtnFull: {
-    backgroundColor: T.brand,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-});

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
+import { useTheme } from '../contexts/ThemeContext'
 import BottomNav from './BottomNav'
 import Toast from './Toast'
 import { getNetWorth } from '../api/dashboard'
@@ -20,6 +21,7 @@ const sidebarItems = [
 export default function Layout() {
   const { name, logout } = useAuthStore()
   const navigate = useNavigate()
+  const { isDark, toggleTheme } = useTheme()
   const [unreadAlerts, setUnreadAlerts] = useState(0)
 
   useEffect(() => {
@@ -34,12 +36,22 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Sidebar — desktop only */}
-      <aside className="hidden md:flex flex-col w-60 bg-white border-r border-gray-200 shrink-0">
-        <div className="px-5 py-4 border-b border-gray-200">
-          <h1 className="text-lg font-semibold text-indigo-700">Life Ledger</h1>
-          <p className="text-xs text-gray-500 mt-0.5 truncate">{name}</p>
+      <aside className="hidden md:flex flex-col w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shrink-0">
+        <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400">Life Ledger</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{name}</p>
+          </div>
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? '☀️' : '🌙'}
+          </button>
         </div>
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           {sidebarItems.map((item) => (
@@ -50,8 +62,8 @@ export default function Layout() {
               className={({ isActive }) =>
                 `flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700 font-medium'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`
               }
             >
@@ -67,10 +79,10 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-4 py-4 border-t border-gray-200">
+        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={handleLogout}
-            className="w-full text-left text-sm text-gray-500 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+            className="w-full text-left text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           >
             Sign out
           </button>
@@ -82,7 +94,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <BottomNav unreadAlerts={unreadAlerts} />
+      <BottomNav unreadAlerts={unreadAlerts} isDark={isDark} toggleTheme={toggleTheme} />
       <Toast />
     </div>
   )

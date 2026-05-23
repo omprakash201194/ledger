@@ -1,5 +1,5 @@
-// Design tokens for Ledger dark theme
-export const T = {
+// Design tokens — Ledger dark theme
+export const darkTheme = {
   bg:      '#0C1119',
   surf:    '#121A26',
   surf2:   '#182130',
@@ -29,6 +29,52 @@ export const T = {
   lowBdr:  'rgba(61,97,140,0.28)',
   lowTx:   '#6090BA',
 } as const;
+
+// Design tokens — Ledger light theme
+export const lightTheme = {
+  bg:      '#EEF2F7',
+  surf:    '#FFFFFF',
+  surf2:   '#F5F8FC',
+  surf3:   '#EBF0F6',
+  bdr:     '#C8D4E0',
+  bdrF:    '#DDE5EE',
+  tx:      '#1A2A3A',
+  txS:     '#4E6478',
+  txM:     '#8A9EB0',
+  brand:   '#3D6E9E',
+  brandL:  '#2D5A8E',
+  gold:    '#9A7020',
+  goldL:   '#7A5810',
+  green:   '#277A4A',
+  greenL:  '#1A6038',
+  red:     '#B83030',
+  redL:    '#982020',
+  amber:   '#9A6818',
+  amberL:  '#7A5010',
+  highBg:  'rgba(184,48,48,0.09)',
+  highBdr: 'rgba(184,48,48,0.22)',
+  highTx:  '#B83030',
+  medBg:   'rgba(154,104,24,0.09)',
+  medBdr:  'rgba(154,104,24,0.22)',
+  medTx:   '#9A6818',
+  lowBg:   'rgba(61,110,158,0.09)',
+  lowBdr:  'rgba(61,110,158,0.22)',
+  lowTx:   '#3D6E9E',
+} as const;
+
+export type AppTheme = {
+  bg: string; surf: string; surf2: string; surf3: string;
+  bdr: string; bdrF: string; tx: string; txS: string; txM: string;
+  brand: string; brandL: string; gold: string; goldL: string;
+  green: string; greenL: string; red: string; redL: string;
+  amber: string; amberL: string;
+  highBg: string; highBdr: string; highTx: string;
+  medBg: string; medBdr: string; medTx: string;
+  lowBg: string; lowBdr: string; lowTx: string;
+};
+
+// Backward-compat — screens import { T } until fully migrated
+export const T = darkTheme;
 
 // Category badge colors
 export const CC: Record<string, { bg: string; tx: string }> = {

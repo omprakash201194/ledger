@@ -145,15 +145,15 @@ export default function AssetsPage() {
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Assets</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Total: <span className="font-semibold text-green-600">{fmt(total)}</span></p>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Assets</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">Total: <span className="font-semibold text-green-600">{fmt(total)}</span></p>
         </div>
         <button onClick={openAdd} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
           + Add asset
         </button>
       </div>
 
-      <SectionIntro note="Everything you own that has financial value — bank accounts, deposits, mutual funds, demat holdings, property, gold, vehicles. If something can be inherited or claimed, it belongs here. Tip: include even small accounts. Forgotten accounts are the single biggest source of family stress later." />
+      <SectionIntro sectionKey="assets" note="Everything you own that has financial value — bank accounts, deposits, mutual funds, demat holdings, property, gold, vehicles. If something can be inherited or claimed, it belongs here. Tip: include even small accounts. Forgotten accounts are the single biggest source of family stress later." />
 
       {/* A4: NOMINEE_MISSING contextual banner */}
       {nomineeMissingMsg && (
@@ -166,20 +166,20 @@ export default function AssetsPage() {
       {/* E2: Sort + filter row */}
       {!loading && assets.length > 0 && (
         <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-xs text-gray-400">Sort:</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Sort:</span>
           {(['value', 'name', 'date'] as SortBy[]).map(s => (
             <button key={s} onClick={() => setSortBy(s)}
-              className={`text-xs px-2 py-1 rounded-full border transition-colors ${sortBy === s ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-600 hover:border-indigo-300'}`}>
+              className={`text-xs px-2 py-1 rounded-full border transition-colors ${sortBy === s ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 dark:text-gray-500 hover:border-indigo-300'}`}>
               {s === 'value' ? 'Value ↓' : s === 'name' ? 'Name' : 'Recent'}
             </button>
           ))}
-          <span className="text-xs text-gray-400 ml-2">Filter:</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">Filter:</span>
           {ASSET_TYPE_GROUPS.map(g => {
             const hasItems = assets.some(a => g.types.includes(a.assetType))
             if (!hasItems) return null
             return (
               <button key={g.label} onClick={() => setFilterGroup(filterGroup === g.label ? null : g.label)}
-                className={`text-xs px-2 py-1 rounded-full border transition-colors ${filterGroup === g.label ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-600 hover:border-indigo-300'}`}>
+                className={`text-xs px-2 py-1 rounded-full border transition-colors ${filterGroup === g.label ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 dark:text-gray-500 hover:border-indigo-300'}`}>
                 {g.label}
               </button>
             )
@@ -191,7 +191,7 @@ export default function AssetsPage() {
       {loading ? (
         <SkeletonCard rows={3} />
       ) : assets.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-4xl mb-3">🏦</p>
           <p className="text-sm mb-3">No assets yet. Add your first asset to get started.</p>
           <button onClick={openAdd} className="text-sm text-indigo-600 border border-indigo-200 px-4 py-1.5 rounded-lg hover:bg-indigo-50">
@@ -203,30 +203,30 @@ export default function AssetsPage() {
           {grouped.map(group => (
             <div key={group.label}>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{group.label}</h2>
+                <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{group.label}</h2>
                 {group.subtotal > 0 && (
                   <span className="text-xs font-medium text-green-600">{fmt(group.subtotal)}</span>
                 )}
               </div>
               <div className="space-y-2">
                 {group.items.map(a => (
-                  <div key={a.id} className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-start justify-between gap-3">
+                  <div key={a.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-gray-800">{a.description}</span>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{a.description}</span>
+                        <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 dark:text-gray-500 px-2 py-0.5 rounded-full">
                           {ASSET_TYPE_LABELS[a.assetType] ?? a.assetType.replace(/_/g, ' ')}
                         </span>
                       </div>
                       <div className="flex gap-4 mt-1 flex-wrap">
-                        {a.institution && <span className="text-xs text-gray-500">{a.institution}</span>}
-                        {a.accountNumber && <span className="text-xs text-gray-400">Acct: {a.accountNumber}</span>}
-                        <span className="text-xs text-gray-500">{a.holdingMode.replace(/_/g, ' ')}</span>
+                        {a.institution && <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{a.institution}</span>}
+                        {a.accountNumber && <span className="text-xs text-gray-400 dark:text-gray-500">Acct: {a.accountNumber}</span>}
+                        <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{a.holdingMode.replace(/_/g, ' ')}</span>
                         {a.trustedPersonName && <span className="text-xs text-blue-600">Nominee: {a.trustedPersonName}</span>}
                       </div>
                       <div className="mt-1 flex items-center gap-3 flex-wrap">
                         <span className="text-sm font-semibold text-green-600">{fmt(a.approxValue)}</span>
-                        {a.valueAsOf && <span className="text-xs text-gray-400">as of {a.valueAsOf}</span>}
+                        {a.valueAsOf && <span className="text-xs text-gray-400 dark:text-gray-500">as of {a.valueAsOf}</span>}
                         {a.maturityDate && <span className="text-xs text-amber-600">matures {a.maturityDate}</span>}
                       </div>
                       {/* E4: Last updated */}
@@ -323,7 +323,7 @@ export default function AssetsPage() {
               <button onClick={save} disabled={saving || !form.description.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg">
                 {saving ? 'Saving…' : editing ? 'Save changes' : 'Add asset'}
               </button>
-              <button onClick={tryClose} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
+              <button onClick={tryClose} className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm py-2 rounded-lg">Cancel</button>
             </div>
           </div>
         </Modal>
@@ -332,10 +332,10 @@ export default function AssetsPage() {
       {/* F1: Discard confirm */}
       {showDiscardConfirm && (
         <Modal title="Discard changes?" onClose={() => setShowDiscardConfirm(false)}>
-          <p className="text-sm text-gray-600 mb-4">You have unsaved changes. Discard them?</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">You have unsaved changes. Discard them?</p>
           <div className="flex gap-3">
             <button onClick={() => { setShowDiscardConfirm(false); setShowModal(false) }} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-lg">Discard</button>
-            <button onClick={() => setShowDiscardConfirm(false)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Keep editing</button>
+            <button onClick={() => setShowDiscardConfirm(false)} className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm py-2 rounded-lg">Keep editing</button>
           </div>
         </Modal>
       )}
@@ -343,10 +343,10 @@ export default function AssetsPage() {
       {/* Delete confirm */}
       {deleteId && (
         <Modal title="Delete asset?" onClose={() => setDeleteId(null)}>
-          <p className="text-sm text-gray-600 mb-4">This will permanently remove the asset record.</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">This will permanently remove the asset record.</p>
           <div className="flex gap-3">
             <button onClick={confirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-lg">Delete</button>
-            <button onClick={() => setDeleteId(null)} className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-lg">Cancel</button>
+            <button onClick={() => setDeleteId(null)} className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm py-2 rounded-lg">Cancel</button>
           </div>
         </Modal>
       )}

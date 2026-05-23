@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -23,10 +23,64 @@ import { TypeBadge } from '@/components/TypeBadge';
 import { CardWrap } from '@/components/CardWrap';
 import { SectionIntro } from '@/components/SectionIntro';
 import { timeAgo } from '@/utils/timeAgo';
-import { T, CC } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { CC } from '@/theme';
 
 export default function DigitalAccountsScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.bg },
+  infoBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: theme.lowBg,
+    borderWidth: 1,
+    borderColor: theme.lowBdr,
+    borderRadius: 10,
+    margin: 16,
+    marginBottom: 0,
+    padding: 12,
+  },
+  infoText: { flex: 1, fontSize: 12, color: theme.txS, lineHeight: 17 },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  iconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  cardInfo: { flex: 1 },
+  serviceName: { fontSize: 14, fontWeight: '600', color: theme.tx, marginBottom: 5 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  username: { fontSize: 11, color: theme.txM },
+  credLoc: { fontSize: 11, color: theme.txM, marginTop: 3 },
+  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 44 },
+  rowActions: { flexDirection: 'row', gap: 2 },
+  actionBtn: { padding: 4 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: theme.brand,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.brand,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+}), [theme]);
+
   const { toast, show: showToast, hide: hideToast } = useToast();
 
   const [accounts, setAccounts] = useState<DigitalAccount[]>([]);
@@ -78,7 +132,7 @@ export default function DigitalAccountsScreen() {
 
   const InfoBanner = () => (
     <View style={styles.infoBanner}>
-      <Ionicons name="information-circle-outline" size={16} color={T.brandL} />
+      <Ionicons name="information-circle-outline" size={16} color={theme.brandL} />
       <Text style={styles.infoText}>
         Important: do not type passwords here. Note where the password is kept
         (e.g. 'in Bitwarden vault' or 'sealed envelope with spouse').
@@ -95,7 +149,7 @@ export default function DigitalAccountsScreen() {
       ) : accounts.length === 0 ? (
         <>
           <InfoBanner />
-          <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Document your online accounts." />
+          <SectionIntro sectionKey="digital-accounts" note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Document your online accounts." />
           <EmptyState
             icon="laptop-outline"
             title="No digital accounts"
@@ -111,11 +165,11 @@ export default function DigitalAccountsScreen() {
           ListHeaderComponent={
             <>
               <InfoBanner />
-              <SectionIntro note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Important: do not type passwords directly here." />
+              <SectionIntro sectionKey="digital-accounts" note="Email, banking apps, investment platforms, government portals, social media and cloud storage. Document your online accounts." />
             </>
           }
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brand} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.brand} />
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
           renderItem={({ item: account }) => {
@@ -144,16 +198,16 @@ export default function DigitalAccountsScreen() {
                       )}
                     </View>
                     <View style={styles.rightCol}>
-                      <Ionicons name="chevron-forward" size={16} color={T.txM} />
+                      <Ionicons name="chevron-forward" size={16} color={theme.txM} />
                       <View style={styles.rowActions}>
                         <TouchableOpacity
                           onPress={() => router.push(`/digital-accounts/form?id=${account.id}`)}
                           style={styles.actionBtn}
                         >
-                          <Ionicons name="pencil-outline" size={13} color={T.txM} />
+                          <Ionicons name="pencil-outline" size={13} color={theme.txM} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDelete(account)} style={styles.actionBtn}>
-                          <Ionicons name="trash-outline" size={13} color={T.redL} />
+                          <Ionicons name="trash-outline" size={13} color={theme.redL} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -175,54 +229,3 @@ export default function DigitalAccountsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: T.lowBg,
-    borderWidth: 1,
-    borderColor: T.lowBdr,
-    borderRadius: 10,
-    margin: 16,
-    marginBottom: 0,
-    padding: 12,
-  },
-  infoText: { flex: 1, fontSize: 12, color: T.txS, lineHeight: 17 },
-  card: { marginBottom: 8 },
-  cardContent: { padding: 14 },
-  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  iconSquare: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  cardInfo: { flex: 1 },
-  serviceName: { fontSize: 14, fontWeight: '600', color: T.tx, marginBottom: 5 },
-  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  username: { fontSize: 11, color: T.txM },
-  credLoc: { fontSize: 11, color: T.txM, marginTop: 3 },
-  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 44 },
-  rowActions: { flexDirection: 'row', gap: 2 },
-  actionBtn: { padding: 4 },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    backgroundColor: T.brand,
-    borderRadius: 18,
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: T.brand,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

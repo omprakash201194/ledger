@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 export default function AssetsLayout() {
+  const { theme } = useAppTheme();
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: T.bg },
+        contentStyle: { backgroundColor: theme.bg },
       }}
     />
   );

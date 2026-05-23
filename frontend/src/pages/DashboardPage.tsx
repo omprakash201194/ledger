@@ -88,15 +88,15 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
-      <h1 className="text-xl font-bold text-gray-800 mb-1">Welcome, {name}</h1>
-      <p className="text-sm text-gray-500 mb-4">Your financial legacy at a glance.</p>
-      <SectionIntro note="Your financial life at a glance. The numbers here are a summary of what you've recorded across each section. Update each section periodically — the more current it is, the more useful it becomes for you today and for your family if you cannot act yourself." />
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-1">Welcome, {name}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">Your financial legacy at a glance.</p>
+      <SectionIntro sectionKey="home" note="Your financial life at a glance. The numbers here are a summary of what you've recorded across each section. Update each section periodically — the more current it is, the more useful it becomes for you today and for your family if you cannot act yourself." />
 
       {/* Stats */}
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[1,2,3,4].map(i => (
-            <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 animate-pulse">
+            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 animate-pulse">
               <div className="h-3 bg-gray-200 rounded w-20 mb-2" />
               <div className="h-6 bg-gray-200 rounded w-24" />
             </div>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             <StatCard
               label="Unread Alerts"
               value={String(summary.unreadAlertCount)}
-              color={summary.unreadAlertCount > 0 ? 'text-amber-600' : 'text-gray-500'}
+              color={summary.unreadAlertCount > 0 ? 'text-amber-600' : 'text-gray-500 dark:text-gray-400 dark:text-gray-500'}
               link="/alerts"
             />
           </div>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                   )
                 })()}
               </div>
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
                 <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-green-400" />Assets</span>
                 <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-red-300" />Liabilities</span>
               </div>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
       )}
 
       {/* B2: Section grid with counts */}
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Sections</h2>
+      <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Sections</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {sections.map((item) => {
           const subtitle = getSectionSubtitle(item.key)
@@ -171,14 +171,14 @@ export default function DashboardPage() {
             <Link
               key={item.to}
               to={item.to}
-              className="bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all"
             >
               <div className="text-2xl mb-1">{item.icon}</div>
-              <div className="text-sm font-semibold text-gray-800">{item.label}</div>
+              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{item.label}</div>
               {subtitle ? (
                 <div className="text-xs text-indigo-600 font-medium mt-0.5">{subtitle}</div>
               ) : (
-                <div className="text-xs text-gray-400 mt-0.5">{item.desc}</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.desc}</div>
               )}
             </Link>
           )
@@ -190,8 +190,8 @@ export default function DashboardPage() {
 
 function StatCard({ label, value, color, link }: { label: string; value: string; color: string; link?: string }) {
   const content = (
-    <div className="bg-white border border-gray-200 rounded-xl p-4">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">{label}</p>
       <p className={`text-lg font-bold ${color}`}>{value}</p>
     </div>
   )

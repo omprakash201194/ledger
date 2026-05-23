@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -24,10 +24,54 @@ import { TypeBadge } from '@/components/TypeBadge';
 import { CardWrap } from '@/components/CardWrap';
 import { SectionIntro } from '@/components/SectionIntro';
 import { timeAgo } from '@/utils/timeAgo';
-import { T, CC } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { CC } from '@/theme';
 
 export default function TrustedPersonsScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.bg },
+  card: { marginBottom: 8 },
+  cardContent: { padding: 14 },
+  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  avatarText: { fontSize: 14, fontWeight: '700' },
+  info: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 },
+  name: { fontSize: 14, fontWeight: '700', color: theme.tx },
+  relationship: { fontSize: 12, color: theme.txS, marginBottom: 5 },
+  contactRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
+  contactItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  contactText: { fontSize: 12 },
+  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 48 },
+  rowActions: { flexDirection: 'row', gap: 2 },
+  actionBtn: { padding: 4 },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: theme.green,
+    borderRadius: 18,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+}), [theme]);
+
   const { toast, show: showToast, hide: hideToast } = useToast();
 
   const [persons, setPersons] = useState<TrustedPerson[]>([]);
@@ -81,7 +125,7 @@ export default function TrustedPersonsScreen() {
         <LoadingState message="Loading..." />
       ) : persons.length === 0 ? (
         <>
-          <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
+          <SectionIntro sectionKey="trusted-persons" note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
           <EmptyState
             icon="people-outline"
             title="No trusted persons"
@@ -95,10 +139,10 @@ export default function TrustedPersonsScreen() {
           data={persons}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <SectionIntro note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
+            <SectionIntro sectionKey="trusted-persons" note="Family members, executors, your CA, lawyer, doctor and other key contacts. These are the people your family should reach first." />
           }
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.green} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.green} />
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
           renderItem={({ item: person }) => {
@@ -129,8 +173,8 @@ export default function TrustedPersonsScreen() {
                             onPress={() => Linking.openURL(`tel:${person.phone}`)}
                             style={styles.contactItem}
                           >
-                            <Ionicons name="call-outline" size={12} color={T.green} />
-                            <Text style={[styles.contactText, { color: T.greenL }]}>{person.phone}</Text>
+                            <Ionicons name="call-outline" size={12} color={theme.green} />
+                            <Text style={[styles.contactText, { color: theme.greenL }]}>{person.phone}</Text>
                           </TouchableOpacity>
                         )}
                         {person.email && (
@@ -138,23 +182,23 @@ export default function TrustedPersonsScreen() {
                             onPress={() => Linking.openURL(`mailto:${person.email}`)}
                             style={styles.contactItem}
                           >
-                            <Ionicons name="mail-outline" size={12} color={T.brandL} />
-                            <Text style={[styles.contactText, { color: T.brandL }]}>{person.email}</Text>
+                            <Ionicons name="mail-outline" size={12} color={theme.brandL} />
+                            <Text style={[styles.contactText, { color: theme.brandL }]}>{person.email}</Text>
                           </TouchableOpacity>
                         )}
                       </View>
                     </View>
                     <View style={styles.rightCol}>
-                      <Ionicons name="chevron-forward" size={16} color={T.txM} />
+                      <Ionicons name="chevron-forward" size={16} color={theme.txM} />
                       <View style={styles.rowActions}>
                         <TouchableOpacity
                           onPress={() => router.push(`/trusted-persons/form?id=${person.id}`)}
                           style={styles.actionBtn}
                         >
-                          <Ionicons name="pencil-outline" size={13} color={T.txM} />
+                          <Ionicons name="pencil-outline" size={13} color={theme.txM} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDelete(person)} style={styles.actionBtn}>
-                          <Ionicons name="trash-outline" size={13} color={T.redL} />
+                          <Ionicons name="trash-outline" size={13} color={theme.redL} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -176,44 +220,3 @@ export default function TrustedPersonsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  card: { marginBottom: 8 },
-  cardContent: { padding: 14 },
-  cardRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  avatarText: { fontSize: 14, fontWeight: '700' },
-  info: { flex: 1 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 },
-  name: { fontSize: 14, fontWeight: '700', color: T.tx },
-  relationship: { fontSize: 12, color: T.txS, marginBottom: 5 },
-  contactRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
-  contactItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  contactText: { fontSize: 12 },
-  rightCol: { alignItems: 'center', justifyContent: 'space-between', height: 48 },
-  rowActions: { flexDirection: 'row', gap: 2 },
-  actionBtn: { padding: 4 },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    backgroundColor: T.green,
-    borderRadius: 18,
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: T.green,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

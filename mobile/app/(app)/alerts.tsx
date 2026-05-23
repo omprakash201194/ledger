@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { EmptyState } from '@/components/EmptyState';
 import { Toast, useToast } from '@/components/Toast';
 import { timeAgo } from '@/utils/timeAgo';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 type Urgency = 'high' | 'medium' | 'low';
 
@@ -42,48 +42,26 @@ const ALERT_ICONS: Record<string, string> = {
   OBLIGATION_REVIEW: '🔄',
 };
 
-const URGENCY_CONFIG: Record<
-  Urgency,
-  { label: string; bg: string; bdr: string; tx: string; dot: string; sectionLabel: string }
-> = {
-  high: {
-    label: 'HIGH',
-    bg: T.highBg,
-    bdr: T.highBdr,
-    tx: T.highTx,
-    dot: T.red,
-    sectionLabel: 'Needs immediate attention',
-  },
-  medium: {
-    label: 'MEDIUM',
-    bg: T.medBg,
-    bdr: T.medBdr,
-    tx: T.medTx,
-    dot: T.amber,
-    sectionLabel: 'Review soon',
-  },
-  low: {
-    label: 'LOW',
-    bg: T.lowBg,
-    bdr: T.lowBdr,
-    tx: T.lowTx,
-    dot: T.brand,
-    sectionLabel: 'For your awareness',
-  },
-};
-
 interface Section {
-  urgency: Urgency;
+  urgency: Urgency | 'read';
   alerts: AlertType[];
 }
 
 export default function AlertsScreen() {
   const { setUnreadCount, decrementUnreadCount } = useAlertStore();
   const { toast, show: showToast, hide: hideToast } = useToast();
+  const { theme } = useAppTheme();
 
   const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Build urgency config from current theme
+  const URGENCY_CONFIG = useMemo(() => ({
+    high: { label: 'HIGH', bg: theme.highBg, bdr: theme.highBdr, tx: theme.highTx, dot: theme.red, sectionLabel: 'Needs immediate attention' },
+    medium: { label: 'MEDIUM', bg: theme.medBg, bdr: theme.medBdr, tx: theme.medTx, dot: theme.amber, sectionLabel: 'Review soon' },
+    low: { label: 'LOW', bg: theme.lowBg, bdr: theme.lowBdr, tx: theme.lowTx, dot: theme.brand, sectionLabel: 'For your awareness' },
+  }), [theme]);
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -125,7 +103,6 @@ export default function AlertsScreen() {
     }
   };
 
-  // Group by urgency
   const unread = alerts.filter((a) => !a.isRead);
   const sections: Section[] = (['high', 'medium', 'low'] as Urgency[])
     .map((urgency) => ({
@@ -137,9 +114,53 @@ export default function AlertsScreen() {
   const readAlerts = alerts.filter((a) => a.isRead);
   const unreadCount = unread.length;
 
+  const styles = useMemo(() => StyleSheet.create({
+    root: { flex: 1, backgroundColor: theme.bg },
+    header: {
+      backgroundColor: theme.surf,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottomWidth: 1,
+      borderBottomColor: theme.bdrF,
+    },
+    headerTitle: { fontSize: 20, fontWeight: '700', color: theme.tx },
+    unreadBadge: {
+      backgroundColor: theme.highBg,
+      borderWidth: 1,
+      borderColor: theme.highBdr,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    unreadBadgeText: { color: theme.highTx, fontSize: 12, fontWeight: '600' },
+    sectionBlock: { marginTop: 16 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 8 },
+    dot: { width: 7, height: 7, borderRadius: 4 },
+    sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
+    sectionDimLabel: { fontSize: 11, fontWeight: '700', color: theme.txM, letterSpacing: 0.6, marginBottom: 8 },
+    alertCard: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 6,
+      gap: 10,
+      alignItems: 'flex-start',
+    },
+    iconSquare: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+    iconEmoji: { fontSize: 18 },
+    alertBody: { flex: 1 },
+    alertTitle: { fontSize: 13, fontWeight: '700', marginBottom: 3 },
+    alertMsg: { fontSize: 12, lineHeight: 17 },
+    alertTime: { fontSize: 11, color: theme.txM, marginTop: 4 },
+  }), [theme]);
+
   const renderAlertCard = (alert: AlertType) => {
     const urgency = URGENCY_MAP[alert.alertType] ?? 'low';
-    const cfg = URGENCY_CONFIG[urgency];
+    const cfg = URGENCY_CONFIG[urgency as Urgency];
     const icon = ALERT_ICONS[alert.alertType] ?? '⚠️';
 
     return (
@@ -149,24 +170,24 @@ export default function AlertsScreen() {
         style={[
           styles.alertCard,
           {
-            backgroundColor: alert.isRead ? T.surf2 : cfg.bg,
-            borderColor: alert.isRead ? T.bdr : cfg.bdr,
+            backgroundColor: alert.isRead ? theme.surf2 : cfg.bg,
+            borderColor: alert.isRead ? theme.bdr : cfg.bdr,
           },
         ]}
       >
-        <View style={[styles.iconSquare, { backgroundColor: alert.isRead ? T.surf3 : cfg.bg }]}>
+        <View style={[styles.iconSquare, { backgroundColor: alert.isRead ? theme.surf3 : cfg.bg }]}>
           <Text style={styles.iconEmoji}>{icon}</Text>
         </View>
         <View style={styles.alertBody}>
-          <Text style={[styles.alertTitle, { color: alert.isRead ? T.txS : T.tx }]}>
+          <Text style={[styles.alertTitle, { color: alert.isRead ? theme.txS : theme.tx }]}>
             {alert.title}
           </Text>
-          <Text style={[styles.alertMsg, { color: alert.isRead ? T.txM : T.txS }]}>
+          <Text style={[styles.alertMsg, { color: alert.isRead ? theme.txM : theme.txS }]}>
             {alert.message}
           </Text>
           <Text style={styles.alertTime}>
             {timeAgo(alert.createdAt)}
-            {!alert.isRead && <Text style={{ color: T.brandL }}> · Tap to dismiss</Text>}
+            {!alert.isRead && <Text style={{ color: theme.brandL }}> · Tap to dismiss</Text>}
           </Text>
         </View>
       </TouchableOpacity>
@@ -200,7 +221,7 @@ export default function AlertsScreen() {
           data={[...sections, readAlerts.length > 0 ? { urgency: 'read' as const, alerts: readAlerts } : null].filter(Boolean)}
           keyExtractor={(_, i) => String(i)}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.brandL} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.brandL} />
           }
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           renderItem={({ item: section }) => {
@@ -231,58 +252,3 @@ export default function AlertsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  header: {
-    backgroundColor: T.surf,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: T.bdrF,
-  },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: T.tx },
-  unreadBadge: {
-    backgroundColor: T.highBg,
-    borderWidth: 1,
-    borderColor: T.highBdr,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  unreadBadgeText: { color: T.highTx, fontSize: 12, fontWeight: '600' },
-  sectionBlock: { marginTop: 16 },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    marginBottom: 8,
-  },
-  dot: { width: 7, height: 7, borderRadius: 4 },
-  sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
-  sectionDimLabel: { fontSize: 11, fontWeight: '700', color: T.txM, letterSpacing: 0.6, marginBottom: 8 },
-  alertCard: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 6,
-    gap: 10,
-    alignItems: 'flex-start',
-  },
-  iconSquare: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconEmoji: { fontSize: 18 },
-  alertBody: { flex: 1 },
-  alertTitle: { fontSize: 13, fontWeight: '700', marginBottom: 3 },
-  alertMsg: { fontSize: 12, lineHeight: 17 },
-  alertTime: { fontSize: 11, color: T.txM, marginTop: 4 },
-});

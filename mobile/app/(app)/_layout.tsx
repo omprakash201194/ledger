@@ -3,13 +3,13 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAlertStore } from '@/store/alertStore';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
-function AlertBadge() {
+function AlertBadge({ theme }: { theme: ReturnType<typeof useAppTheme>['theme'] }) {
   const unreadCount = useAlertStore((s) => s.unreadCount);
   if (unreadCount === 0) return null;
   return (
-    <View style={styles.badge}>
+    <View style={[styles.badge, { backgroundColor: theme.red }]}>
       <Text style={styles.badgeText}>
         {unreadCount > 99 ? '99+' : unreadCount}
       </Text>
@@ -17,26 +17,28 @@ function AlertBadge() {
   );
 }
 
-function MoreIcon({ color, size }: { color: string; size: number }) {
+function MoreIcon({ color, size, theme }: { color: string; size: number; theme: ReturnType<typeof useAppTheme>['theme'] }) {
   return (
     <View>
       <Ionicons name="grid-outline" size={size} color={color} />
-      <AlertBadge />
+      <AlertBadge theme={theme} />
     </View>
   );
 }
 
 export default function AppLayout() {
+  const { theme } = useAppTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: T.brandL,
-        tabBarInactiveTintColor: T.txM,
+        tabBarActiveTintColor: theme.brandL,
+        tabBarInactiveTintColor: theme.txM,
         tabBarStyle: {
           borderTopWidth: 1,
-          borderTopColor: T.bdrF,
-          backgroundColor: T.surf,
+          borderTopColor: theme.bdrF,
+          backgroundColor: theme.surf,
           paddingBottom: 20,
           height: 72,
         },
@@ -44,7 +46,6 @@ export default function AppLayout() {
           fontSize: 11,
           fontWeight: '500',
         },
-
       }}
     >
       <Tabs.Screen
@@ -88,8 +89,15 @@ export default function AppLayout() {
         options={{
           title: 'More',
           tabBarIcon: ({ color, size }) => (
-            <MoreIcon color={color} size={size} />
+            <MoreIcon color={color} size={size} theme={theme} />
           ),
+        }}
+      />
+      {/* Settings is a stack screen within (app), not a tab */}
+      <Tabs.Screen
+        name="settings"
+        options={{
+          href: null, // hide from tab bar
         }}
       />
     </Tabs>
@@ -101,7 +109,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -6,
-    backgroundColor: T.red,
     borderRadius: 8,
     minWidth: 16,
     height: 16,

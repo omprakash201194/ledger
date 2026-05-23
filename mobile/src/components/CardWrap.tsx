@@ -6,7 +6,7 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { T } from '@/theme';
+import { useAppTheme } from '@/contexts/ThemeContext';
 
 interface CardWrapProps {
   children: React.ReactNode;
@@ -16,6 +16,7 @@ interface CardWrapProps {
 
 export function CardWrap({ children, onPress, style }: CardWrapProps) {
   const scale = useRef(new Animated.Value(1)).current;
+  const { theme } = useAppTheme();
 
   const handlePressIn = () => {
     Animated.spring(scale, {
@@ -41,19 +42,19 @@ export function CardWrap({ children, onPress, style }: CardWrapProps) {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={[styles.card, { transform: [{ scale }] }, style]}>
+      <Animated.View style={[
+        {
+          backgroundColor: theme.surf2,
+          borderWidth: 1,
+          borderColor: theme.bdr,
+          borderRadius: 10,
+          overflow: 'hidden',
+        },
+        { transform: [{ scale }] },
+        style,
+      ]}>
         {children}
       </Animated.View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: T.surf2,
-    borderWidth: 1,
-    borderColor: T.bdr,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-});

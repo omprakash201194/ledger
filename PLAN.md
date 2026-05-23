@@ -400,3 +400,16 @@ All 19 improvements from the plan implemented:
 - **Recurring:** colored icon squares, amount with frequency suffix
 - **Section intro notes:** added to all 9 sections on both webapp and mobile with final copy
 - **Google OAuth2 fix:** `MobileOAuth2DetectionFilter` registered before `OAuth2AuthorizationRequestRedirectFilter`, `SameSite=None; Secure` cookie, `openAuthSessionAsync` on mobile
+
+### v1.5.0 — UX fixes + light/dark mode ✅ DONE (commit `2a71d64`)
+- **SectionIntro dismissible (web + mobile):** New `sectionKey` prop; dismissed state persisted in localStorage (web) / SecureStore (mobile) per-section. X button in banner.
+- **SectionIntro placement fixed (mobile Home):** Moved to first child of ScrollView — above Net Worth hero card instead of after Setup Progress.
+- **Assets empty-state banner fixed (mobile):** SectionIntro moved above FlatList/EmptyState branch — always visible regardless of data count.
+- **Alerts removed from More drawer (mobile):** Deduplicated — Alerts is already a dedicated bottom tab.
+- **Settings screen (mobile):** New `/(app)/settings` screen with dark/light toggle Switch; accessible from More drawer.
+- **Light/dark theme system (mobile):** `ThemeContext` with `darkTheme`/`lightTheme` token objects; SecureStore persistence; `Appearance.setColorScheme()` for NativeWind; `AppTheme` type uses `string` (not literals) to work with both themes.
+- **All mobile screens migrated:** `StyleSheet.create()` moved from module-level to `useMemo(() => StyleSheet.create({...theme}), [theme])` in all screens (index, assets, insurance, alerts, more, liabilities, recurring, digital-accounts, trusted-persons, will).
+- **Tab bar themed:** Active/inactive tint colors and background driven by `useAppTheme()`.
+- **Light/dark theme system (web):** `ThemeContext` with localStorage persistence; `.dark` class toggled on `<html>`; theme toggle button (☀️/🌙) in sidebar header and BottomNav More drawer.
+- **Web dark mode coverage:** All pages and components have `dark:` Tailwind variants.
+- **Phantom tab fix:** `_layout.tsx` Stack navigators added to `assets/` and `insurance/` so `form.tsx` is a stack screen, not a phantom bottom tab.

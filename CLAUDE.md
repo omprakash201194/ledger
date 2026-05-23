@@ -15,16 +15,17 @@ A sample data file (`Family_Financial_Digital_Legacy_Register_SAMPLE.xlsx`) in t
 
 ## Current status
 
-**v1.4.0 live — mobile dark theme redesign complete.**
+**v1.5.0 live — light/dark mode, dismissible banners, UX fixes complete.**
 
 - Internal: `https://ledger.homelab.local`
 - Public: `https://ledger.onelifestack.com` (Cloudflare Tunnel)
 - Auth: email/password + Google OAuth2 + forgot-password email flow, all working
-- Mobile: React Native (Expo 51) app with dark theme, EAS build for Android APK distribution
+- Mobile: React Native (Expo 51) app with light/dark theme toggle, EAS build for Android APK distribution
 - CI/CD: GitHub Actions deploys on every push to `main` (uses `github.sha` image tags)
 - v1.2.0: New asset types (NPS/BANK_LOCKER), maturity date field, 4 new alert types
 - v1.3.0: Toast notifications, skeleton loading, progressive disclosure forms, dashboard improvements, BottomNav More drawer, asset grouping/sort/filter, relative timestamps, empty-state CTAs, discard-changes confirm, Enter-to-submit
 - v1.4.0: Mobile dark theme redesign (theme.ts tokens, TypeBadge, CardWrap), section intro notes on all pages, Google OAuth2 deep link fix
+- v1.5.0: Dismissible SectionIntro (per-section localStorage/SecureStore), light/dark mode on web + mobile, Settings screen (mobile), fixed Assets empty-state banner, removed Alerts dupe from More drawer, phantom tab fix
 
 **v1.2.0 additions (commit `f972f88`):**
 - Asset types: CURRENT_ACCOUNT, RECURRING_DEPOSIT, NPS, BANK_LOCKER added
